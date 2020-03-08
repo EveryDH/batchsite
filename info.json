@@ -1,0 +1,9 @@
+{
+  "title": "batchsite",
+  "name": "batchsite",
+  "ps": "宝塔插件开发示例项目",
+  "versions": "1.0",
+  "checks": "/www/server/panel/plugin/batchsite",
+  "author": "IW3C",
+  "home": "https://www.iw3c.top"
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "domain": "www.123.com",
+    "second_domain": "123.com"
+  },
+  {
+    "domain": "www.234.com",
+    "second_domain": "234.com"
+  },
+  {
+    "domain": "www.345.com",
+    "second_domain": "345.com"
+  },
+  {
+    "domain": "www.567.com",
+    "second_domain": "567.com"
+  },
+  {
+    "domain": "www.678.com",
+    "second_domain": "678.com"
+  },
+  {
+    "domain": "www.789.com",
+    "second_domain": "789.com"
+  },
+  {
+    "domain": "www.123.com",
+    "second_domain": "123.com"
+  },
+  {
+    "domain": "www.456.com",
+    "second_domain": "456.com"
+  },
+  {
+    "domain": "www.789.com",
+    "second_domain": "789.com"
+  },
+  {
+    "domain": "www.123.com",
+    "second_domain": "123.com"
+  },
+  {
+    "domain": "www.456.com",
+    "second_domain": "456.com"
+  },
+  {
+    "domain": "www.789.com",
+    "second_domain": "789.com"
+  }
+]

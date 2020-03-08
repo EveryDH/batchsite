@@ -1,0 +1,179 @@
+<!-- 节点管理页面 -->
+<!DOCTYPE html>
+<html class="x-admin-sm">
+<head>
+    <meta charset="UTF-8">
+    <title>管理后台</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="stylesheet" href="src/x-admin/css/font.css">
+    <link rel="stylesheet" href="src/x-admin/css/xadmin.css">
+    <link rel="stylesheet" href="src/x-admin/lib/layui/css/layui.css">
+    <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="src/x-admin/lib/layui/layui.js"></script>
+    <script type="text/javascript" src="src/x-admin/js/xadmin.js"></script>
+    <script type="text/javascript" src="src/x-admin/js/batchsite.js"></script>
+</head>
+<body>
+<table class="layui-table">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header">
+                        <button class="layui-btn layui-btn-danger" onclick="saveSelect()"><i class="layui-icon"></i>批量添加
+                        </button>
+                        <button class="layui-btn" onclick="xadmin.open('添加HOST','host_add.html',500,300)"><i
+                                class="layui-icon"></i>添加
+                        </button>
+                    </div>
+                    <div class="layui-card-body layui-table-body layui-table-main">
+                        <table class="layui-table layui-form" id="ServerListTable">
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</table>
+</body>
+<script>
+
+
+    layui.config({
+        version: '1583393622929' //为了更新 js 缓存，可忽略
+    });
+
+    var load;
+    var layer;
+
+    layui.use('form', function () {
+        form = layui.form;
+
+        // 监听全选
+        form.on('checkbox(checkall)', function (data) {
+            if (data.elem.checked) $('tbody input').prop('checked', true);
+            else $('tbody input').prop('checked', false);
+            form.render('checkbox');
+        });
+    });
+
+    layui.use('layer', function () {
+        layer = layui.layer;
+        load = layer.msg('加载 batchsite_config 配置中...', {time: false});
+        get_domain_list();
+    });
+
+    function get_domain_list() {
+        request_plugin("batchsite", "get_domain_list", "", function (rdata) {
+            console.log(rdata)
+            if (rdata["status"] == "Success") {
+                var tablehtml = ' <thead><tr><th><input type="checkbox"  lay-filter="checkall" name="" lay-skin="primary" onclick="SelectAll()"></th><th>ID</th><th>域名</th></th><th>二级域名</th> <th>操作</th></tr></thead><tbody>\n';
+                for (var i = 0; i < rdata.data.length; i++) {
+                    domain_data = rdata.data[i].domain;
+                    second_domain_data = rdata.data[i].second_domain;
+                    tablehtml = tablehtml + "<tr><td>" + '<input type="checkbox" name="SiteList" value="' + domain_data + ',' + second_domain_data + '" class="' + second_domain_data + '"  lay-skin="primary"  >' +
+                        "</td><td>" + (i + 1) +
+                        "</td><td>" + domain_data +
+                        "</td><td>" + second_domain_data +
+                        "</td><td>" + '<a title="编辑"  onclick="xadmin.open(\'编辑\',\'host_edit.html?domain=' + domain_data + '\',500,300)" href="javascript:;"><i class="layui-icon">&#xe642;</i> </a>'
+                        + '<a title="删除" onclick="member_del(1,\'' + domain_data + '\')" href="javascript:;"><i class="layui-icon">&#xe640;</i></a>' +
+                        "</td></tr>\n";
+                }
+                $("#ServerListTable").html(tablehtml + "</tbody>");
+                layer.close(load);
+                form.render('checkbox');
+            }
+        })
+    }
+
+
+    function member_del(type, host) {
+        if (type == 1) {
+            layer.confirm('确认要删除吗？', function (index) {
+                $.ajax({
+                    url: "/batchsite/DelDomainConfig.json",
+                    type: "POST",
+                    data: "domain=" + host,
+                    dataType: "JSON",
+                    success: function (rdata) {
+                        layer.msg(rdata["msg"], {icon: 1, time: 3000});
+                        get_domain_list();
+                    }
+                })
+            });
+        } else {
+            $.ajax({
+                url: "/batchsite/DelDomainConfig.json",
+                type: "POST",
+                data: "domain=" + host,
+                dataType: "JSON",
+                success: function (rdata) {
+                    console.log(rdata["msg"]);
+                }
+
+            });
+        }
+    }
+
+
+    function delSelect() {
+        layer.confirm('确认要删除这些记录吗？', function (index) {
+            checkbox = $("[name='SiteList']");
+            num = checkbox.length;
+            for (var i = 0; i < num; i++) {
+                dom = checkbox[i];
+                if (dom.checked) {
+                    host = dom.value;
+                    member_del(0, host);
+                }
+
+            }
+            layer.msg('批量删除成功!', {icon: 1, time: 3000});
+            get_domain_list();
+
+        });
+    }
+
+    function saveSelect() {
+        layer.confirm('确认要保存这些记录吗？', function (index) {
+            checkbox = $("[name='SiteList']");
+            num = checkbox.length;
+            var siteList = [];
+            
+            for (var i = 0; i < num; i++) {
+                dom = checkbox[i];
+                if (dom.checked) {
+                    var site_obj = {};
+                    data = dom.value
+                    var arraydata = data.split(',')
+                    site_obj.domain = arraydata[0];
+                    site_obj.second_domain = arraydata[1];
+                    siteList.push(site_obj)
+                }
+            }
+            console.log("before",siteList)
+            request_plugin("batchsite", "save_domain_list", "", function (rdata) {
+                layer.msg('批量添加成功! 共添加： ' + rdata.data +' 个', {icon: 1, time: 3000});
+            })
+            // member_save(siteList);
+            layer.msg('批量添加成功!', {icon: 1, time: 3000});
+            get_domain_list();
+
+        });
+    }
+
+    function member_save(siteList) {
+        console.log(siteList)
+        layer.confirm('确认要添加吗？', function (index) {
+            request_plugin("batchsite", "save_domain_list", "", function (rdata) {
+                layer.msg('批量添加成功! 共添加： ' + rdata.data +' 个', {icon: 1, time: 3000});
+                console.log(rdata.data )
+            })
+        });
+    }
+
+    batchsite.get_domain_list();
+
+</script>
+</html>
