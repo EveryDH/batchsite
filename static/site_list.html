@@ -66,7 +66,6 @@
 
     function get_domain_list() {
         request_plugin("batchsite", "get_domain_list", "", function (rdata) {
-            console.log(rdata)
             if (rdata["status"] == "Success") {
                 var tablehtml = ' <thead><tr><th><input type="checkbox"  lay-filter="checkall" name="" lay-skin="primary" onclick="SelectAll()"></th><th>ID</th><th>域名</th></th><th>二级域名</th> <th>操作</th></tr></thead><tbody>\n';
                 for (var i = 0; i < rdata.data.length; i++) {
@@ -111,7 +110,6 @@
                 success: function (rdata) {
                     console.log(rdata["msg"]);
                 }
-
             });
         }
     }
@@ -148,13 +146,15 @@
                     data = dom.value
                     var arraydata = data.split(',')
                     site_obj.domain = arraydata[0];
+                    debugger
                     site_obj.second_domain = arraydata[1];
                     siteList.push(site_obj)
+                    debugger
                 }
             }
             console.log("before",siteList)
-            request_plugin("batchsite", "save_domain_list", "", function (rdata) {
-                layer.msg('批量添加成功! 共添加： ' + rdata.data +' 个', {icon: 1, time: 3000});
+            request_plugin("batchsite", "save_domain_list", {callback: 'demo.get_logs'}, function (rdata) {
+                layer.msg('批量添加成功! 共添加： ' + rdata +' 个', {icon: 1, time: 3000});
             })
             // member_save(siteList);
             layer.msg('批量添加成功!', {icon: 1, time: 3000});
@@ -167,8 +167,8 @@
         console.log(siteList)
         layer.confirm('确认要添加吗？', function (index) {
             request_plugin("batchsite", "save_domain_list", "", function (rdata) {
-                layer.msg('批量添加成功! 共添加： ' + rdata.data +' 个', {icon: 1, time: 3000});
-                console.log(rdata.data )
+                layer.msg('批量添加成功! 共添加： ' + rdata +' 个', {icon: 1, time: 3000});
+                console.log(rdata )
             })
         });
     }
