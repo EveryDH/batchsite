@@ -63,7 +63,6 @@
 
     function get_domain_list() {
         request_plugin("batchsite", "get_domain_list", "", function (rdata) {
-            console.log(rdata)
             if (rdata["status"] == "Success") {
                 var tablehtml = ' <thead><tr><th><input type="checkbox"  lay-filter="checkall" name="" lay-skin="primary" onclick="SelectAll()"></th><th>ID</th><th>域名</th></th><th>二级域名</th> <th>操作</th></tr></thead><tbody>\n';
                 for (var i = 0; i < rdata.data.length; i++) {

@@ -137,7 +137,8 @@
         layer.confirm('确认要保存这些记录吗？', function (index) {
             checkbox = $("[name='SiteList']");
             num = checkbox.length;
-            var siteList = [];
+            // var siteList = [];
+            var siteList = new Array();
             
             for (var i = 0; i < num; i++) {
                 dom = checkbox[i];
@@ -146,17 +147,15 @@
                     data = dom.value
                     var arraydata = data.split(',')
                     site_obj.domain = arraydata[0];
-                    debugger
                     site_obj.second_domain = arraydata[1];
                     siteList.push(site_obj)
-                    debugger
                 }
             }
             console.log("before",siteList)
-            request_plugin("batchsite", "save_domain_list", {callback: 'demo.get_logs'}, function (rdata) {
-                layer.msg('批量添加成功! 共添加： ' + rdata +' 个', {icon: 1, time: 3000});
+            request_plugin("batchsite", "save_domain_list",{ "siteList" :JSON.stringify(siteList)}, function (rdata) {
+                layer.msg('批量添加成功! 共添加： ' + rdata.size +' 个', {icon: 1, time: 3000});
             })
-            // member_save(siteList);
+            // member_save(siteList); 
             layer.msg('批量添加成功!', {icon: 1, time: 3000});
             get_domain_list();
 

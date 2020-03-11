@@ -11,7 +11,7 @@
 # +--------------------------------------------------------------------
 # |   宝塔第三方应用开发DEMO
 # +--------------------------------------------------------------------
-import io, re, public, os, sys, files, json, panelSite, database, files,ftp
+import io, re, public, os, sys, files, json, panelSite, database, files, ftp
 
 # 设置运行目录
 os.chdir("/www/server/panel")
@@ -82,17 +82,19 @@ class batchsite_main:
         pass
 
     def save_domain_list(self, args):
+        if not 'siteList' in args: return public.returnMsg(False, '参数不正确!')
         global cacheList
+        siteList = json.loads(args.siteList)
         list = []
-        result = []
         if len(cacheList) > 0:
             cacheList.clear()
         else:
-            for site in args:
-                list.append(Site(site.domain, site.second_domain))
+            for site in siteList:
+                list.append(Site(site['domain'], site['second_domain']))
             cacheList = list
-            result['data'] = len(cacheList);
-        return {"status": "Success", "data": result['data']}
+            result = {}
+            result['size'] = len(cacheList);
+        return {"status": "Success", "size": result['size']}
 
     def delete_domain_list(self, args):
         pass

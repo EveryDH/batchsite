@@ -9,9 +9,7 @@
         // 填充插件的可用安装文件包
         get_domain_list: function () {
             request_plugin("batchsite", "get_domain_list", "", function (rdata) {
-                console.log(rdata)
                 if (rdata["status"] == "Success") {
-
                     var redataBody = '';
                     for (var i = 0; i < rdata.data.length; i++) {
                         id = i + 1;
