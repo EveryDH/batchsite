@@ -1,102 +1,122 @@
 <!-- 节点管理页面 -->
 <!DOCTYPE html>
 <html class="x-admin-sm">
+
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>管理后台</title>
-    <meta name="renderer" content="webkit">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <link rel="stylesheet" href="src/x-admin/css/font.css">
-    <link rel="stylesheet" href="src/x-admin/css/xadmin.css">
-    <link rel="stylesheet" href="src/x-admin/lib/layui/css/layui.css" media="all">
+    <meta name="renderer" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <link rel="stylesheet" href="src/x-admin/css/font.css" />
+    <link rel="stylesheet" href="src/x-admin/css/xadmin.css" />
+    <link rel="stylesheet" href="src/x-admin/lib/layui/css/layui.css" media="all" />
     <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
-    <script type="text/javascript" src="src/x-admin/lib/layui/layui.js"></script>
-    <script type="text/javascript" src="src/x-admin/lib/layui/layui.all.js"></script>
+    <script type="text/javascript" src="src/x-admin/lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="src/x-admin/lib/layui/layui.all.js" charset="utf-8"></script>
     <script type="text/javascript" src="src/x-admin/js/xadmin.js"></script>
     <script type="text/javascript" src="src/x-admin/js/batchsite.js"></script>
+    <style>
+        .layui-input-block {
+            width: 100px;
+        }
+
+        .bt-form {
+            height: 100%;
+            padding-bottom: 70px;
+            padding: 20px;
+        }
+
+        #form-item-click {
+            width: 300px;
+            left: 200px
+        }
+    </style>
 </head>
+
 <body>
-<form class="layui-form">
-    <div class="layui-form-item">
-        <label class="layui-form-label">根目录</label>
-        <div class="layui-input-block">
-            <input type="text" name="" placeholder="请输入" autocomplete="off" class="layui-input">
-        </div>
+    <div data-id="form_PtmWkF" class="bt-form">
+        <form class="layui-form">
+            <div class="layui-form-item">
+                <label class="layui-form-label">根目录</label>
+                <div class="layui-input-block" style="width:330px">
+                    <input type="text" name="path" placeholder="请输入" autocomplete="off" class="layui-input"
+                        value="/www/wwwroot" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">FTP</label>
+                <div class="layui-input-block">
+                    <select name="ftp" class="select-option">
+                        <option value="0">创建</option>
+                        <option value="1">不创建</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">数据库</label>
+                <div class="layui-input-block">
+                    <select name="sql">
+                        <option value="0">不创建</option>
+                        <option value="1">MySQL</option>
+                        <option value="1">SQLServer</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">程序类型</label>
+                <div class="layui-input-block">
+                    <select name="type">
+                        <option value="PHP">PHP</option>
+                        <option value="Asp">Asp</option>
+                        <option value="Aspx">Aspx</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">PHP版本</label>
+                <div class="layui-input-block">
+                    <select name="version">
+                        <option value="54">PHP-54</option>
+                        <option value="00">纯静态</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" name="form-item-click">
+                    <button type="submit" class="layui-btn" lay-submit="" lay-filter="submit-commit">立即提交</button>
+                    <button type="button" class="layui-btn layui-btn-primary quxiao">取消</button>
+                </div>
+            </div>
+        </form>
     </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">FTP</label>
-        <div class="layui-input-block">
-            <select name="interest" lay-filter="aihao">
-                <option value="0">创建</option>
-                <option value="1">不创建</option>
-            </select>
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">数据库</label>
-        <div class="layui-input-block">
-            <select name="interest" lay-filter="aihao">
-                <option value="0">不创建</option>
-                <option value="1">MySQL</option>
-                <option value="1">SQLServer</option>
-            </select>
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">FTP</label>
-        <div class="layui-input-block">
-            <select name="interest" lay-filter="aihao">
-                <option value="0">创建</option>
-                <option value="1">不创建</option>
-            </select>
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">程序类型</label>
-        <div class="layui-input-block">
-            <select name="interest" lay-filter="aihao">
-                <option value="PHP">PHP</option>
-                <option value="Asp">Asp</option>
-                <option value="Aspx">Aspx</option>
-            </select>
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">程序类型</label>
-        <div class="layui-input-block">
-            <select name="interest" lay-filter="aihao">
-                <option value="54">PHP-54</option>
-                <option value="00">纯静态</option>
-            </select>
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">单行选择框</label>
-        <div class="layui-input-block">
-            <select name="interest" lay-filter="aihao">
-                <option value=""></option>
-                <option value="0">写作</option>
-                <option value="1" selected="">阅读</option>
-                <option value="2">游戏</option>
-                <option value="3">音乐</option>
-                <option value="4">旅行</option>
-            </select>
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <div class="layui-input-block">
-            <button class="layui-btn" lay-submit lay-filter="*">立即提交</button>
-            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
-        </div>
-    </div>
-    <!-- 更多表单结构排版请移步文档左侧【页面元素-表单】一项阅览 -->
-</form>
 </body>
 <script>
-    layui.use('form', function(){
-  var form = layui.form; //只有执行了这一步，部分表单元素才会自动修饰成功
+    layui.use(['form'], function () {
+        var form = layui.form,
+            layer = layui.layer;
 
-  form.render();
-});    
+        form.render();
+
+        //监听提交
+        form.on('submit(submit-commit)', function (data) {
+            rdata = JSON.stringify(data.field)
+            layer.msg(rdata);
+            console.log(rdata);
+            // add_domain_list()
+            return false
+        });
+    });
+
+    function add_domain_list() {
+        request_plugin("batchsite", "add_domain_list", {
+            'add_domain_list': add_domain_list
+        }, function (rdata) {
+            if (rdata["status"] == "Success") {
+
+
+            }
+        })
+    }
 </script>
+
 </html>
