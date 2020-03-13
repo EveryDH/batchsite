@@ -3,13 +3,13 @@
 <html class="x-admin-sm">
 
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <title>管理后台</title>
-    <meta name="renderer" content="webkit" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <link rel="stylesheet" href="src/x-admin/css/font.css" />
-    <link rel="stylesheet" href="src/x-admin/css/xadmin.css" />
-    <link rel="stylesheet" href="src/x-admin/lib/layui/css/layui.css" media="all" />
+    <meta name="renderer" content="webkit"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <link rel="stylesheet" href="src/x-admin/css/font.css"/>
+    <link rel="stylesheet" href="src/x-admin/css/xadmin.css"/>
+    <link rel="stylesheet" href="src/x-admin/lib/layui/css/layui.css" media="all"/>
     <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="src/x-admin/lib/layui/layui.js" charset="utf-8"></script>
     <script type="text/javascript" src="src/x-admin/lib/layui/layui.all.js" charset="utf-8"></script>
@@ -34,89 +34,101 @@
 </head>
 
 <body>
-    <div data-id="form_PtmWkF" class="bt-form">
-        <form class="layui-form">
-            <div class="layui-form-item">
-                <label class="layui-form-label">根目录</label>
-                <div class="layui-input-block" style="width:330px">
-                    <input type="text" name="path" placeholder="请输入" autocomplete="off" class="layui-input"
-                        value="/www/wwwroot" />
-                </div>
+<div data-id="form_PtmWkF" class="bt-form">
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">根目录</label>
+            <div class="layui-input-block" style="width:330px">
+                <input type="text" name="path" placeholder="请输入" autocomplete="off" class="layui-input"
+                       value="/www/wwwroot/"/>
             </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label">FTP</label>
-                <div class="layui-input-block">
-                    <select name="ftp" class="select-option">
-                        <option value="0">创建</option>
-                        <option value="1">不创建</option>
-                    </select>
-                </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">数据库</label>
+            <div class="layui-input-block" style="width:330px">
+                <input type="text" name="datauser" class="layui-input"
+                       value=数据库账号>
+                <br>
+                <input type="text" name="datapassword" class="layui-input"
+                       value="数据库密码"/>
             </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label">数据库</label>
-                <div class="layui-input-block">
-                    <select name="sql">
-                        <option value="0">不创建</option>
-                        <option value="1">MySQL</option>
-                        <option value="1">SQLServer</option>
-                    </select>
-                </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">FTP</label>
+            <div class="layui-input-block" style="width:330px">
+                <input type="text" name="ftp_username" class="layui-input"
+                       value=FTP账号>
+                <br>
+                <input type="text" name="ftp_password" class="layui-input"
+                       value="FTP密码"/>
             </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label">程序类型</label>
-                <div class="layui-input-block">
-                    <select name="type">
-                        <option value="PHP">PHP</option>
-                        <option value="Asp">Asp</option>
-                        <option value="Aspx">Aspx</option>
-                    </select>
-                </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">程序类型</label>
+            <div class="layui-input-block">
+                <select name="type">
+                    <option value="PHP">PHP</option>
+                    <option value="Asp">Asp</option>
+                    <option value="Aspx">Aspx</option>
+                </select>
             </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label">PHP版本</label>
-                <div class="layui-input-block">
-                    <select name="version">
-                        <option value="54">PHP-54</option>
-                        <option value="00">纯静态</option>
-                    </select>
-                </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">PHP版本</label>
+            <div class="layui-input-block">
+                <select name="version">
+                    <option value="54">PHP-54</option>
+                    <option value="00">纯静态</option>
+                </select>
             </div>
-            <div class="layui-form-item">
-                <div class="layui-input-block" name="form-item-click">
-                    <button type="submit" class="layui-btn" lay-submit="" lay-filter="submit-commit">立即提交</button>
-                    <button type="button" class="layui-btn layui-btn-primary quxiao">取消</button>
-                </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">端口</label>
+            <div class="layui-input-block" style="width:100px">
+                <input type="text" name="port" class="layui-input" value="80"/>
             </div>
-        </form>
-    </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block" name="form-item-click" style="width:300px; left: 250px">
+                <button type="submit" class="layui-btn" lay-submit="" lay-filter="submit-commit">立即提交</button>
+            </div>
+        </div>
+    </form>
+</div>
 </body>
 <script>
-    layui.use(['form'], function () {
-        var form = layui.form,
-            layer = layui.layer;
 
-        form.render();
+    var load;
+    var layer;
+    layui.config({
+        version: '1583393622929' //为了更新 js 缓存，可忽略
+    });
+    layui.use('form', function () {
+        form = layui.form;
 
-        //监听提交
-        form.on('submit(submit-commit)', function (data) {
-            rdata = JSON.stringify(data.field)
-            layer.msg(rdata);
-            console.log(rdata);
-            // add_domain_list()
-            return false
-        });
     });
 
-    function add_domain_list() {
+    //监听提交
+    form.on('submit(submit-commit)', function (data) {
+        sdata = JSON.stringify(data.field)
+        console.log(sdata);
+        add_domain_list(sdata);
+        return false
+    });
+
+    function add_domain_list(sdata) {
         request_plugin("batchsite", "add_domain_list", {
-            'add_domain_list': add_domain_list
+            'domain_info': sdata
         }, function (rdata) {
             if (rdata["status"] == "Success") {
-
+                // layer.msg('批量添加站点成功! 共添加： ' + rdata.size +' 个', {icon: 1, time: 3000});
+                layer.msg('批量添加站点成功! 共添加： ' + rdata.data + ' 个', {icon: 1, time: 3000});
 
             }
         })
     }
+
+    form.render();
 </script>
 
 </html>

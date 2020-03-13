@@ -11,7 +11,7 @@
 # +--------------------------------------------------------------------
 # |   宝塔第三方应用开发DEMO
 # +--------------------------------------------------------------------
-import io, re, public, os, sys, files, json, panelSite, database, files, ftp
+import io, re, public, os, sys, json, panelSite, database, files, ftp, copy
 
 # 设置运行目录
 os.chdir("/www/server/panel")
@@ -23,9 +23,6 @@ sys.path.append("class/")
 BT_SITE = panelSite.panelSite()
 BT_DATA = database.database()
 BT_FILE = files.files()
-
-cacheList = []
-cacheDict = {}
 
 
 class Site:
@@ -66,41 +63,47 @@ class dict_obj:
     def get_items(self): return self
 
 
-# 在非命令行模式下引用面板缓存和session对象
-if __name__ != '__main__':
-    from BTPanel import cache, session, redirect
+cacheDict = {}
+cacheList = []
 
 
 class batchsite_main:
-    __setupPath = 'plugin/batchsite';
-    __plugin_path = "/www/server/panel/plugin/batchsite/"
-    __host_path = "/etc/hosts"
-    __config = None
+    __SETUP_PATH = 'plugin/batchsite';
+    __PLUGIN_PATH = "/www/server/panel/plugin/batchsite/"
+    __HOST_PATH = "/etc/hosts"
+    __CONFIG = None
+    __SITE_FILE = __PLUGIN_PATH + 'addsites.json'
+    __BAG_PATH = __PLUGIN_PATH + 'install'
 
     # 构造方法
     def __init__(self):
         pass
 
+    # 保存domain list数据到local
     def save_domain_list(self, args):
         if not 'siteList' in args: return public.returnMsg(False, '参数不正确!')
-        global cacheList
         siteList = json.loads(args.siteList)
-        list = []
-        if len(cacheList) > 0:
-            cacheList.clear()
-        else:
-            for site in siteList:
-                list.append(Site(site['domain'], site['second_domain']))
-            cacheList = list
+        self.__set_sites(siteList)
+        if os.path.exists(self.__SITE_FILE):
             result = {}
-            result['size'] = len(cacheList);
-        return {"status": "Success", "size": result['size']}
+            result['size'] = len(siteList);
+            return {"status": "Success", "size": result['size']}
+        if not os.path.exists(self.__SITE_FILE):
+            return public.returnMsg(False, 'DIR_DEL_ERR')
+
+    #  sites.json 根据用户点击提交后重新加载写入数据
+    def __set_sites(self, args):
+        site_file = self.__SITE_FILE;
+        if os.path.exists(site_file):
+            os.remove(site_file)
+        if not os.path.exists(site_file):
+            public.WriteFile(site_file, json.dumps(args))
 
     def delete_domain_list(self, args):
         pass
 
     def get_domain_list(self, args):
-        jsonFile = self.__setupPath + '/batchsite_config.json';
+        jsonFile = self.__SETUP_PATH + '/batchsite_config.json';
         if not os.path.exists(jsonFile): return public.returnMsg(False, '配置文件不存在!');
         data = {}
         data = json.loads(public.readFile(jsonFile));
@@ -112,61 +115,92 @@ class batchsite_main:
         result['data'] = data;
         return {"status": "Success", "data": result['data']}
 
+    def __get_sites(self):
+        site_file = self.__SITE_FILE;
+        if not os.path.exists(site_file):
+            return public.returnMsg(False, 'DIR_NOT_EXISTS_ERR')
+        sites_data = json.loads(public.ReadFile(site_file))
+        return sites_data
+
     # 批量添加站点域名
     def add_domain_list(self, args):
-        global cacheList
-        for site in cacheList:
-            domain = site.domain
-            second_domain = site.second_domain
-            if self.CheckDomainExist(domain):
-                return {"status": "error", "msg": "试图添加的域名[" + domain + "]已经存在！"}
+        # 获取用户确认后的 site信息
+        # sites_data = self.__get_sites()
+        # result = {}
+        # result['size'] = len(sites_data);
+        # data = json.loads(args.domain_info)
+        # return {"status": "Success", "data":data}
+
+        data = json.loads(args.domain_info)
+        sites_data = self.__get_sites()
+        # # 获取前端表单数据
+        for site in sites_data:
+            domain = site["domain"]
+            second_domain = site["second_domain"]
+            # if self.CheckDomainExist(domain):
+            #     return {"status": "error", "msg": "试图添加的域名[" + domain + "]已经存在！"}
 
             # 构造创建网站必须的参数
             site = dict_obj()
             site.webname = json.dumps({"domain": domain, "domainlist": [second_domain], "count": 0})
-            site.path = "/www/wwwroot/" + domain
-            site.type = args.type
-            site.type_id = args.type_id
-            site.version = args.version
-            site.port = args.port
+            site.path = data['path'] + domain
+            site.type = data['type']
+            site.type_id = 0
+            site.version = data['version']
+            site.port = data['port']
             site.ps = "[" + domain + "] 一键部署"
-            site.codeing = args.codeing
+            site.codeing = "utf8"
+            site.ftp = "true"
+            site.ftp_username = data['ftp_username']
+            site.ftp_password = data['ftp_password']
 
-            site.ftp = args.ftp
-            site.ftp_username = args.ftp_username
-            site.ftp_password = args.ftp_username
+            site.sql = "MySQL"
+            site.datauser = data['datauser']
+            site.datapassword = data['datapassword']
 
-            site.sql = args.sql
-            site.datauser = args.datauser
-            site.datapassword = args.datapassword
+            # 添加网站
+            psa = BT_SITE.AddSite(site)
+            if "status" in psa.keys():
+                result = {}
+                result['size'] = psa;
+        return {"status": "Success", "data": result['size']}
 
-            result = BT_SITE.AddSite(site)
-            result['status']
 
-            # 导入数据库
-            data = dict_obj()
-            data.file = site.path + "/base/install/db/db.sql"
-            data.name = site.datauser
-            BT_DATA.InputSql(data)
+# # 解压文件
+# os.popen("cd " + self.__BAG_PATH + " && unzip -o " + args.filename + " -d " + site.path + "/")
+#
+# # 导入数据库
+# data = dict_obj()
+# data.file = site.path + "/base/install/db/db.sql"
+# data.name = site.datauser
+# BT_DATA.InputSql(data)
+#
+# # 创建FTP
+# BTftp = ftp.ftp()
+# FTP = dict_obj()
+# FTP.ftp_username = site.datauser
+# FTP.ftp_password = public.GetRandomString(16)
+# FTP.path = site.path
+# FTP.ps = site.ps
+# BTftp.AddUser(FTP)
+#
+# # 删除原目录下的 install 文件夹
+# os.popen("rm -rf " + site.path + "/base/install/")
+# file = dict_obj()
+# file.filename = site.path
+# file.user = "www"
+# file.access = "777"
+# file.all = "True"
+# BT_FILE.SetFileAccess(file);
 
-            # 创建FTP
-            BTftp = ftp.ftp()
-            FTP = dict_obj()
-            FTP.ftp_username = site.datauser
-            FTP.ftp_password = public.GetRandomString(16)
-            FTP.path = site.path
-            FTP.ps = site.ps
-            BTftp.AddUser(FTP)
-
-            # 删除原目录下的 install 文件夹
-            os.popen("rm -rf " + site.path + "/base/install/")
-            file = dict_obj()
-            file.filename = site.path
-            file.user = "www"
-            file.access = "777"
-            file.all = "True"
-            BT_FILE.SetFileAccess(file)
-        pass
+# 判断域名是否存在
+def CheckDomainExist(self, cdomain):
+    # 获得当前配置文件下的所有域名
+    Domains = self.GetHostConfig("")
+    for domain in Domains["domains"]:
+        if domain["host"] == cdomain:
+            return True
+    return False
 
 
 # 读取linux 的host 文件
@@ -297,13 +331,3 @@ def EditDomainConfig(self, get):
             return {"status": "success", "msg": "域名[" + get.olddomain + "]修改成功！"}
         else:
             return res
-
-
-# 判断域名是否存在
-def CheckDomainExist(self, cdomain):
-    # 获得当前配置文件下的所有域名
-    Domains = self.GetHostConfig("")
-    for domain in Domains["domains"]:
-        if domain["host"] == cdomain:
-            return True
-    return False
