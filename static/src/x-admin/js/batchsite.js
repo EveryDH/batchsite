@@ -127,12 +127,12 @@
      * @param callback       请传入处理函数，响应内容将传入到第一个参数中
      */
     function request_plugin(plugin_name, function_name, args, callback, timeout) {
-        // if (!timeout) timeout = 100000;
+        if (!timeout) timeout = 3600;
         $.ajax({
             type: 'POST',
             url: '/plugin?action=a&s=' + function_name + '&name=' + plugin_name,
             data: args,
-            timeout: 100000,
+            timeout: timeout,
             success: function (rdata) {
 
                 if (!callback) {

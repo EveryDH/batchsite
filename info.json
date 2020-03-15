@@ -1,9 +1,9 @@
 {
-  "title": "batchsite",
+  "title": "批量添加站点",
   "name": "batchsite",
-  "ps": "宝塔插件开发示例项目",
+  "ps": "批量添加站点",
   "versions": "1.0",
   "checks": "/www/server/panel/plugin/batchsite",
-  "author": "IW3C",
-  "home": "https://www.iw3c.top"
+  "author": "Every",
+  "home": "https://www.xxx.com"
 }

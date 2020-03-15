@@ -49,7 +49,7 @@ class batchsite_main:
     __SETUP_PATH = 'plugin/batchsite';
     __PLUGIN_PATH = "/www/server/panel/plugin/batchsite/"
     __PLUGIN_CONFIG = __PLUGIN_PATH + "config/config.json"
-    __PLUGIN_RESULT = __PLUGIN_PATH + "config/batchsite_result.json"
+    __PLUGIN_RESULT_LOG = __PLUGIN_PATH + "config/result_log.json"
     __HOST_PATH = "/etc/hosts"
     __CONFIG = None
     __SITE_FILE = __PLUGIN_PATH + 'addsites.json'
@@ -123,6 +123,10 @@ class batchsite_main:
         data = json.loads(args.domain_info)
         site_file = self.__SITE_FILE;
         sites_data = self.get_read_file(site_file)
+
+        successSize = [];
+        failureSize = [];
+
         # # 获取前端表单数据
         for site in sites_data:
             domain = site["domain"]
@@ -150,11 +154,17 @@ class batchsite_main:
             site_obj.zip = data["zip"]
 
             # 添加网站
-            rsiez = [];
             psa = BT_SITE.AddSite(site_obj)
-            if "status" in psa.keys() and psa["status"] == "Success":
-                    rsiez.append(psa)
-            # return {"status": "Success", "data": len(rsiez)}
+            if "siteStatus" in psa.keys():
+                successSize.append(psa.copy())
+            if "status" in psa.keys():
+                failureSize.append(psa.copy())
+
+            # 保存 建站日志到 本地
+            # resultSize.append(successSize)
+            # resultSize.append(failureSize)
+            # self.set_write_file(successSize, self.__PLUGIN_RESULT_LOG)
+            # return {"status": "Success", "failureSize": failureSize}
 
             # 删除网站目录下的所有无用的文件
             os.popen("cd " + site_obj.path + " && rm -rf *")
@@ -189,24 +199,24 @@ class batchsite_main:
             # 修改配置文件
             # 构建PHP 的配置文件
             PhpConfig = '''<?php
-            #[数据库参数]
-            $dbHost="127.0.0.1";
-            $dbName="%s";
-            $dbUser="%s";
-            $dbPass="%s";
-
-            #[数据表前缀]
-            $TablePre="dev";
-
-            #[语言]
-            $sLan="zh_cn";
-
-            #[网址]
-            $SiteUrl="http://%s";
-
-            #----------------------------------#
-            ?>
-            ''' % (site_obj.datauser, site_obj.datauser, site_obj.datapassword, domain)
+                #[数据库参数]
+                $dbHost="127.0.0.1";
+                $dbName="%s";
+                $dbUser="%s";
+                $dbPass="%s";
+    
+                #[数据表前缀]
+                $TablePre="dev";
+    
+                #[语言]
+                $sLan="zh_cn";
+    
+                #[网址]
+                $SiteUrl="http://%s";
+    
+                #----------------------------------#
+                ?>
+                ''' % (site_obj.datauser, site_obj.datauser, site_obj.datapassword, domain)
             # 写入站点
             public.WriteFile(site_obj.path + "/config.inc.php", PhpConfig.encode("GB2312"))
             # 删除原目录下的 install 文件夹
@@ -217,10 +227,15 @@ class batchsite_main:
             file.access = "755"
             file.all = "True"
             files.files().SetFileAccess(file)
-        return {"status": "Success", "site": {"Success": len(rsiez)}}
-        # return {"status": "Success", "site": {"Success": domain, "Failure": site_obj.datauser,
-        #                                       "data_pass": site_obj.datapassword, "site_path": site_obj.path,
-        #                                       "ftp_username": site_obj.ftp_username, "ftp_password": site_obj.ftp_password}}
+
+        count = successSize + failureSize
+        self.set_write_file(successSize, self.__PLUGIN_RESULT_LOG)
+        return {"status": "Success", "site":
+            {"count": len(count), "successSize": len(successSize), "failureSize": len(failureSize)}}
+
+    # return {"status": "Success", "site": {"Success": domain, "Failure": site_obj.datauser,
+    #                                       "data_pass": site_obj.datapassword, "site_path": site_obj.path,
+    #                                       "ftp_username": site_obj.ftp_username, "ftp_password": site_obj.ftp_password}}
 
     # 判断域名是否存在
     def CheckDomainExist(self, cdomain):
