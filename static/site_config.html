@@ -43,26 +43,27 @@
                        value="/www/wwwroot/"/>
             </div>
         </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">数据库</label>
-            <div class="layui-input-block" style="width:330px">
-                <input type="text" name="datauser" class="layui-input"
-                       value=数据库账号>
-                <br>
-                <input type="text" name="datapassword" class="layui-input"
-                       value="数据库密码"/>
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">FTP</label>
-            <div class="layui-input-block" style="width:330px">
-                <input type="text" name="ftp_username" class="layui-input"
-                       value=FTP账号>
-                <br>
-                <input type="text" name="ftp_password" class="layui-input"
-                       value="FTP密码"/>
-            </div>
-        </div>
+        <!--       <div class="layui-form-item">
+                   <label class="layui-form-label">数据库</label>
+                   <div class="layui-input-block" style="width:330px">
+                       <input type="text" name="datauser" class="layui-input"
+                              value=数据库账号>
+                       <br>
+                       <input type="text" name="datapassword" class="layui-input"
+                              value="数据库密码"/>
+                   </div>
+               </div>
+               <div class="layui-form-item">
+                   <label class="layui-form-label">FTP</label>
+                   <div class="layui-input-block" style="width:330px">
+                       <input type="text" name="ftp_username" class="layui-input"
+                              value=FTP账号>
+                       <br>
+                       <input type="text" name="ftp_password" class="layui-input"
+                              value="FTP密码"/>
+                   </div>
+               </div>
+               -->
         <div class="layui-form-item">
             <label class="layui-form-label">程序类型</label>
             <div class="layui-input-block">
@@ -89,6 +90,13 @@
             </div>
         </div>
         <div class="layui-form-item">
+            <label class="layui-form-label">部署软件zip包</label>
+            <div class="layui-input-block">
+                <select name="zip" id="option_list">
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
             <div class="layui-input-block" name="form-item-click" style="width:300px; left: 250px">
                 <button type="submit" class="layui-btn" lay-submit="" lay-filter="submit-commit">立即提交</button>
             </div>
@@ -105,8 +113,9 @@
     });
     layui.use('form', function () {
         form = layui.form;
-
+        OptionCodeList();
     });
+    form.render();
 
     //监听提交
     form.on('submit(submit-commit)', function (data) {
@@ -117,18 +126,29 @@
     });
 
     function add_domain_list(sdata) {
-        request_plugin("batchsite", "add_domain_list", {
-            'domain_info': sdata
-        }, function (rdata) {
+        request_plugin("batchsite", "add_domain_list", {'domain_info': sdata}, function (rdata) {
             if (rdata["status"] == "Success") {
                 // layer.msg('批量添加站点成功! 共添加： ' + rdata.size +' 个', {icon: 1, time: 3000});
-                layer.msg('批量添加站点成功! 共添加： ' + rdata.data + ' 个', {icon: 1, time: 3000});
-
+                layer.msg('批量添加站点成功! 共添加： ' + rdata.site + ' 个', {icon: 1, time: 3000});
             }
         })
     }
 
-    form.render();
+    // 搜索当前的可用插件的安装包
+    function OptionCodeList() {
+        request_plugin("batchsite", "GetInstallList", "", function (rdata) {
+            if (rdata["status"] == "Success") {
+                var html = '';
+                console.log(rdata["List"]);
+                for (var i = 0; i < rdata["List"].length; i++) {
+                    html = '<option value="' + rdata["List"][i] + '">' + rdata["List"][i] + '</option>>';
+                }
+                $("#option_list").html(html);
+                form.render('select');
+            }
+        });
+    }
+
 </script>
 
 </html>
