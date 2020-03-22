@@ -44,10 +44,23 @@ class dict_obj:
 cacheDict = {}
 cacheList = []
 
+from flask import session
+
+#在非命令行模式下引用面板缓存和session对象
+if __name__ != '__main__':
+    from BTPanel import cache,session,redirect
+
+    #设置缓存(超时10秒) cache.set('key',value,10)
+    #获取缓存 cache.get('key')
+    #删除缓存 cache.delete('key')
+
+    #设置session:  session['key'] = value
+    #获取session:  value = session['key']
+    #删除session:  del(session['key'])
 
 class batchsite_main:
-    __SETUP_PATH = 'plugin/batchsite';
-    __PLUGIN_PATH = "/www/server/panel/plugin/batchsite/"
+    __SETUP_PATH = 'plugin/batchsite'
+    __PLUGIN_PATH = os.getenv("BT_PANEL")
     __PLUGIN_CONFIG = __PLUGIN_PATH + "config/config.json"
     __PLUGIN_RESULT_LOG = __PLUGIN_PATH + "config/result_log.json"
     __HOST_PATH = "/etc/hosts"
@@ -246,38 +259,9 @@ class batchsite_main:
                 return True
         return False
 
-        # 读取linux 的host 文件
 
-    def GetHostConfig(self, get):
-        Hosts = public.ReadFile(self.__host_path)
-        Domains = []
 
-        # 按行切割配置文件
-        host = Hosts.split("\n")
-        # 使用空格切割每行中的数据
-        for _host in host:
-            info = _host.split(" ")
-            i = 0
-            for domain in info:
-                if domain == " " or domain == "":
-                    pass
-                else:
-                    _domain = {"host": "", "ip": ""}
-                    if i == 0:
-                        ip = domain
-                    else:
-                        _domain["host"] = domain
-                        _domain["ip"] = ip
-                    if _domain["ip"] == "":
-                        pass
-                    else:
-                        Domains.append(_domain)
-                i = i + 1
-        num = len(Domains)
-        return {"status": "succecss", "domains": Domains, "num": num}
-
-        # 获取新站点的ID
-
+    # 获取新站点的ID
     def GetSiteNewID(self):
         MaxId = public.M("sqlite_sequence").where('name=?', ("sites")).field('seq').find()
         if "seq" in MaxId:
