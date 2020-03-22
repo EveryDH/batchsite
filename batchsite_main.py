@@ -11,7 +11,7 @@
 # +--------------------------------------------------------------------
 # |   宝塔第三方应用开发DEMO
 # +--------------------------------------------------------------------
-import io, re, public, os, sys, json, panelSite, database, files, ftp, copy, site
+import io, re, public, os, sys, json, panelSite, database, files, ftp, copy, site,pandas
 
 # 设置运行目录
 os.chdir("/www/server/panel")
@@ -46,26 +46,27 @@ cacheList = []
 
 from flask import session
 
-#在非命令行模式下引用面板缓存和session对象
+# 在非命令行模式下引用面板缓存和session对象
 if __name__ != '__main__':
-    from BTPanel import cache,session,redirect
+    from BTPanel import cache, session, redirect
 
-    #设置缓存(超时10秒) cache.set('key',value,10)
-    #获取缓存 cache.get('key')
-    #删除缓存 cache.delete('key')
+    # 设置缓存(超时10秒) cache.set('key',value,10)
+    # 获取缓存 cache.get('key')
+    # 删除缓存 cache.delete('key')
 
-    #设置session:  session['key'] = value
-    #获取session:  value = session['key']
-    #删除session:  del(session['key'])
+    # 设置session:  session['key'] = value
+    # 获取session:  value = session['key']
+    # 删除session:  del(session['key'])
+
 
 class batchsite_main:
     __SETUP_PATH = 'plugin/batchsite'
-    __PLUGIN_PATH = os.getenv("BT_PANEL")
+    __PLUGIN_PATH = "/www/server/panel/plugin/batchsite/"
+    __CONFIG = __SETUP_PATH + "/config"
     __PLUGIN_CONFIG = __PLUGIN_PATH + "config/config.json"
     __PLUGIN_RESULT_LOG = __PLUGIN_PATH + "config/result_log.json"
     __HOST_PATH = "/etc/hosts"
-    __CONFIG = None
-    __SITE_FILE = __PLUGIN_PATH + 'addsites.json'
+    __SITE_FILE = __PLUGIN_PATH + 'config/addsites.json'
     __BAG_PATH = __PLUGIN_PATH + 'install'
 
     # 构造方法
@@ -122,6 +123,33 @@ class batchsite_main:
         result = {}
         result['data'] = data;
         return {"status": "Success", "data": result['data']}
+
+    # 上传 域名文件
+    def upload_domain_txt(self, args):
+        data = self.UploadFile(args)
+        return {"data": data}
+
+    # 使用 pandas 之前需要先执行: pip install pandas
+    # 上传 Excel 域名文件
+    def upload_domain_excel(self, args):
+        file = self.UploadFile(args)
+        df = pandas.read_excel(file)
+        # print the column names
+        print
+        df.columns
+        # get the values for a given column
+        values = df['domian'].values
+        # get a data frame with selected columns
+        FORMAT = ['domian', 'second_domain', 'datauser','datapassword', 'ftp_username', 'ftp_password']
+        df_selected = df[FORMAT]
+        return {"data": df_selected}
+
+
+    # 上传文件 接收 file
+    def UploadFile(self, get):
+        from flask import request
+        file = request.files['file']
+        return file
 
     # 批量添加站点域名
     def add_domain_list(self, args):
@@ -258,8 +286,6 @@ class batchsite_main:
             if domain["host"] == cdomain:
                 return True
         return False
-
-
 
     # 获取新站点的ID
     def GetSiteNewID(self):
