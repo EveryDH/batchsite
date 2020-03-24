@@ -11,7 +11,7 @@
 # +--------------------------------------------------------------------
 # |   宝塔第三方应用开发DEMO
 # +--------------------------------------------------------------------
-import io, re, public, os, sys, json, panelSite, database, files, ftp, copy, site,pandas
+import io, re, public, os, sys, json, panelSite, database, files, ftp, copy, site, pandas
 
 # 设置运行目录
 os.chdir("/www/server/panel")
@@ -67,7 +67,7 @@ class batchsite_main:
     __PLUGIN_RESULT_LOG = __PLUGIN_PATH + "config/result_log.json"
     __HOST_PATH = "/etc/hosts"
     __SITE_FILE = __PLUGIN_PATH + 'config/addsites.json'
-    __BAG_PATH = __PLUGIN_PATH + 'install'
+    __bag_path = __PLUGIN_PATH + 'install/'
 
     # 构造方法
     def __init__(self):
@@ -112,7 +112,8 @@ class batchsite_main:
         pass
 
     def get_domain_list(self, args):
-        jsonFile = self.__SETUP_PATH + '/batchsite_config.json';
+        # jsonFile = self.__SETUP_PATH + '/batchsite_config.json';
+        jsonFile = self.__SITE_FILE
         if not os.path.exists(jsonFile): return public.returnMsg(False, '配置文件不存在!');
         data = {}
         data = json.loads(public.readFile(jsonFile));
@@ -134,16 +135,23 @@ class batchsite_main:
     def upload_domain_excel(self, args):
         file = self.UploadFile(args)
         df = pandas.read_excel(file)
-        # print the column names
-        print
-        df.columns
-        # get the values for a given column
-        values = df['domian'].values
-        # get a data frame with selected columns
-        FORMAT = ['domian', 'second_domain', 'datauser','datapassword', 'ftp_username', 'ftp_password']
-        df_selected = df[FORMAT]
-        return {"data": df_selected}
+        json = df.to_json(orient='records')
+        path = self.__SITE_FILE
+        if os.path.exists(path):
+            os.remove(path)
+        if not os.path.exists(path):
+            public.WriteFile(path, json)
+        return {"data": json, "path": path}
 
+    def upload_zip(self, args):
+        fileName = os.path.split(args.name)[1]
+        zipPath = self.__bag_path + fileName
+        file = self.UploadFile(args)
+        if os.path.exists(zipPath):
+            os.remove(zipPath)
+        if not os.path.exists(zipPath):
+            public.writeFile(zipPath, file)
+        return {"path": zipPath}
 
     # 上传文件 接收 file
     def UploadFile(self, get):
@@ -245,16 +253,16 @@ class batchsite_main:
                 $dbName="%s";
                 $dbUser="%s";
                 $dbPass="%s";
-    
+
                 #[数据表前缀]
                 $TablePre="dev";
-    
+
                 #[语言]
                 $sLan="zh_cn";
-    
+
                 #[网址]
                 $SiteUrl="http://%s";
-    
+
                 #----------------------------------#
                 ?>
                 ''' % (site_obj.datauser, site_obj.datauser, site_obj.datapassword, domain)
