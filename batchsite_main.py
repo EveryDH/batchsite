@@ -3,14 +3,10 @@
 # +-------------------------------------------------------------------
 # | 宝塔Linux面板
 # +-------------------------------------------------------------------
-# | Copyright (c) 2015-2099 宝塔软件(http://bt.cn) All rights reserved.
+# | Author: Every <907139945@qq.com>
 # +-------------------------------------------------------------------
-# | Author: xxx <xxxx@qq.com>
+# |   宝塔批量建站工具 batchsite
 # +-------------------------------------------------------------------
-
-# +--------------------------------------------------------------------
-# |   宝塔第三方应用开发DEMO
-# +--------------------------------------------------------------------
 import io, re, public, os, sys, json, panelSite, database, files, ftp, copy, site, pandas
 
 # 设置运行目录
@@ -142,16 +138,6 @@ class batchsite_main:
         if not os.path.exists(path):
             public.WriteFile(path, json)
         return {"data": json, "path": path}
-
-    def upload_zip(self, args):
-        fileName = os.path.split(args.name)[1]
-        zipPath = self.__bag_path + fileName
-        file = self.UploadFile(args)
-        if os.path.exists(zipPath):
-            os.remove(zipPath)
-        if not os.path.exists(zipPath):
-            public.writeFile(zipPath, file)
-        return {"path": zipPath}
 
     # 上传文件 接收 file
     def UploadFile(self, get):
@@ -419,3 +405,8 @@ class batchsite_main:
                 self.FileDir.append(path)
         if int(args.back) == 1:
             return self.FileDir
+
+    # 获得当前的php 的版本信息
+    def OptionPHPVersion(self, args):
+        version = BT_SITE.GetPHPVersion(args)
+        return {"status": "Success", "list": version}

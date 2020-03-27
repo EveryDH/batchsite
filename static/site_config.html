@@ -143,9 +143,7 @@
         <div class="layui-form-item">
             <label class="layui-form-label">PHP版本</label>
             <div class="layui-input-block">
-                <select name="version">
-                    <option value="54">PHP-54</option>
-                    <option value="00">纯静态</option>
+                <select name="version" id="version_list">
                 </select>
             </div>
         </div>
@@ -164,7 +162,6 @@
         </div>
         <div class="layui-form-item">
             <div class="layui-input-block" name="form-item-click" style="width:300px; left: 250px">
-                <button type="button" class="layui-btn" id="uploadZip"><i class="layui-icon"> </i>上传应用Zip</button>
                 <button type="submit" class="layui-btn" lay-submit="" lay-filter="submit-commit">立即提交</button>
             </div>
         </div>
@@ -181,27 +178,9 @@
     layui.use('form', function () {
         form = layui.form;
         OptionCodeList();
+        OptionPHPVersion();
     });
     form.render();
-
-    layui.use('upload', function () {
-        var $ = layui.jquery
-            , upload = layui.upload;
-
-        //指定允许上传的文件类型
-        layer.msg('上传成功');
-        upload.render({
-            elem: '#uploadZip'
-            , url: '/batchsite/upload_zip.json'
-            , method: 'POST'  //可选项。HTTP类型，默认post
-            , accept: 'file'
-            , done:
-                function (res) {
-                    layer.msg('上传成功');
-                    console.log(res);
-                }
-        });
-    });
 
     //监听提交
     form.on('submit(submit-commit)', function (data) {
@@ -242,12 +221,24 @@
     function OptionCodeList() {
         request_plugin("batchsite", "GetInstallList", "", function (rdata) {
             if (rdata["status"] == "Success") {
-                var html = '';
                 console.log(rdata["List"]);
                 for (var i = 0; i < rdata["List"].length; i++) {
-                    html = '<option value="' + rdata["List"][i] + '">' + rdata["List"][i] + '</option>>';
+                  $("#option_list").append('<option value="' + rdata["List"][i] + '">' + rdata["List"][i] + '</option>>')
                 }
-                $("#option_list").html(html);
+                form.render('select');
+            }
+        });
+    }
+
+        // 搜索当前的可用插件的安装包
+    function OptionPHPVersion() {
+        request_plugin("batchsite", "OptionPHPVersion", "", function (rdata) {
+            if (rdata["status"] == "Success") {
+                // var html = '';
+                console.log(rdata["list"]);
+                for (var i = 0; i < rdata["list"].length; i++) {
+                    $("#version_list").append('<option value="' + rdata["list"][i]["version"]+ '">' + rdata["list"][i]["name"] + '</option>>')
+                }
                 form.render('select');
             }
         });
