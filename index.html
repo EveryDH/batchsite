@@ -5,9 +5,9 @@
     <div class="bt-w-main">
         <!--菜单部分-->
         <div class="bt-w-menu">
-            <p class="bgw" onclick="batchsite.page_index()">已导入列表</p>
-            <!-- <p onclick="batchsite.page_site_delete()">已导入的列表</p> -->
-            <p onclick="batchsite.page_site_config()">添加网站</p>
+            <p class="bgw" onclick="batchsite.page_index()">导入列表</p>
+            <p onclick="batchsite.site_add()">添加网站</p>
+            <p onclick="batchsite.site_delete()">删除网址</p>
             <p onclick="batchsite.page_about()">关于</p>
         </div>
         <!--内容部分-->
@@ -16,16 +16,17 @@
                 <iframe src="batchsite/static/site_list.html" style="width: 100%;height: 520px" frameborder="no"
                         border="0" marginwidth="0" marginheight="0" scrolling="yes" allowtransparency="yes"></iframe>
             </div>
-            <div class="plugin_body" id="page_site_delete" style="display: none">
+            <div class="plugin_body" id="site_add" style="display: none">
+                <iframe src="batchsite/static/site_add.html" style="width: 100%;height: 520px" frameborder="no"
+                        border="0" marginwidth="0" marginheight="0" scrolling="yes" allowtransparency="yes"></iframe>
+            </div>
+            <div class="plugin_body" id="site_delete" style="display: none">
                 <iframe src="batchsite/static/site_delete.html" style="width: 100%;height: 520px" frameborder="no"
                         border="0" marginwidth="0" marginheight="0" scrolling="yes" allowtransparency="yes"></iframe>
             </div>
-            <div class="plugin_body" id="page_site_config" style="display: none">
-                <iframe src="batchsite/static/site_config.html" style="width: 100%;height: 520px" frameborder="no"
-                        border="0" marginwidth="0" marginheight="0" scrolling="yes" allowtransparency="yes"></iframe>
-            </div>
             <div class="plugin_body" id="page_about" style="display: none">
-                <div id="About_logo" align="center"><img src="/static/img/soft_ico/ico-batchsite.png" width="186px"></div>
+                <div id="About_logo" align="center"><img src="/static/img/soft_ico/ico-batchsite.png" width="186px">
+                </div>
                 <br/>
                 <div id="About_dev">
                     <table align="left" style="position:absolute; left:42%; top:75%;" border="0">
@@ -90,13 +91,13 @@
             batchsite.page_flush();
             $("#page_index").css("display", "block");
         },
-        page_site_delete: function () {
+        site_delete: function () {
             batchsite.page_flush();
-            $("#page_site_delete").css("display", "block");
+            $("#site_delete").css("display", "block");
         },
-        page_site_config: function () {
+        site_add: function () {
             batchsite.page_flush();
-            $("#page_site_config").css("display", "block");
+            $("#site_add").css("display", "block");
         },
         page_about: function () {
             batchsite.page_flush();

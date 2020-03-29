@@ -7,7 +7,9 @@
 # +-------------------------------------------------------------------
 # |   宝塔批量建站工具 batchsite
 # +-------------------------------------------------------------------
-import io, re, public, os, sys, json, panelSite, database, files, ftp, copy, site, pandas
+import io, re, public, os, sys, json, panelSite, database, files, ftp, copy, site, pandas as pd, data
+from openpyxl.workbook import Workbook
+from flask import send_file, send_from_directory
 
 # 设置运行目录
 os.chdir("/www/server/panel")
@@ -19,6 +21,7 @@ sys.path.append("class/")
 BT_SITE = panelSite.panelSite()
 BT_DATA = database.database()
 BT_FILE = files.files()
+BT_DOMAIN_DATA = data.data()
 
 
 # 取通用对象
@@ -36,34 +39,29 @@ class dict_obj:
 
     def get_items(self): return self
 
-
 cacheDict = {}
 cacheList = []
 
-from flask import session
+from flask import session, Response
 
 # 在非命令行模式下引用面板缓存和session对象
 if __name__ != '__main__':
     from BTPanel import cache, session, redirect
 
-    # 设置缓存(超时10秒) cache.set('key',value,10)
-    # 获取缓存 cache.get('key')
-    # 删除缓存 cache.delete('key')
-
-    # 设置session:  session['key'] = value
-    # 获取session:  value = session['key']
-    # 删除session:  del(session['key'])
-
-
 class batchsite_main:
     __SETUP_PATH = 'plugin/batchsite'
     __PLUGIN_PATH = "/www/server/panel/plugin/batchsite/"
-    __CONFIG = __SETUP_PATH + "/config"
+    __CONFIG = __SETUP_PATH + "/config/"
     __PLUGIN_CONFIG = __PLUGIN_PATH + "config/config.json"
     __PLUGIN_RESULT_LOG = __PLUGIN_PATH + "config/result_log.json"
     __HOST_PATH = "/etc/hosts"
-    __SITE_FILE = __PLUGIN_PATH + 'config/addsites.json'
+    __SITE_ADD_FILE = __PLUGIN_PATH + 'config/addsites.json'
+    __SITE_DEL_FILE = __PLUGIN_PATH + 'config/delsites.json'
     __bag_path = __PLUGIN_PATH + 'install/'
+    __domain_excle = 'domain.xlsx'
+    __excle_path = __CONFIG + __domain_excle
+    __ap_excle_path = __PLUGIN_PATH + __domain_excle
+
 
     # 构造方法
     def __init__(self):
@@ -81,13 +79,13 @@ class batchsite_main:
     def save_domain_list(self, args):
         if not 'siteList' in args: return public.returnMsg(False, '参数不正确!')
         siteList = json.loads(args.siteList)
-        site_file = self.__SITE_FILE;
+        site_file = self.__SITE_ADD_FILE;
         self.set_write_file(siteList, site_file)
-        if os.path.exists(self.__SITE_FILE):
+        if os.path.exists(self.__SITE_ADD_FILE):
             result = {}
             result['size'] = len(siteList);
             return {"status": "Success", "size": result['size']}
-        if not os.path.exists(self.__SITE_FILE):
+        if not os.path.exists(self.__SITE_ADD_FILE):
             return public.returnMsg(False, 'DIR_DEL_ERR')
 
     #  通用替换文件 写入
@@ -105,13 +103,24 @@ class batchsite_main:
         return sites_data
 
     def delete_domain_list(self, args):
+
+        data = json.loads(args.domain_info)
+        site_file = self.__SITE_ADD_FILE;
+        sites_data = self.get_read_file(site_file)
+        successSize = [];
+        failureSize = [];
+        site_obj = dict_obj()
+        site_obj.id = data["id"]
+        site_obj.webname = data["webname"]
+        site_obj.path = data["path"]
+        BT_SITE.DeleteSite(site_obj)
         pass
 
     def get_domain_list(self, args):
         # jsonFile = self.__SETUP_PATH + '/batchsite_config.json';
-        jsonFile = self.__SITE_FILE
-        if not os.path.exists(jsonFile): return public.returnMsg(False, '配置文件不存在!');
-        data = {}
+        jsonFile = self.__SITE_ADD_FILE
+        if not os.path.exists(jsonFile):
+            return {"status": "False", "msg": "未上传域名详情表，请上传Excel文件域名详情表!"}
         data = json.loads(public.readFile(jsonFile));
         tmp = [];
         for d in data:
@@ -128,11 +137,24 @@ class batchsite_main:
 
     # 使用 pandas 之前需要先执行: pip install pandas
     # 上传 Excel 域名文件
-    def upload_domain_excel(self, args):
+    def upload_add_domain_excel(self, args):
+        path = self.__SITE_ADD_FILE
+        rdata = self.upload_excel(args,path)
+        return rdata
+
+    def upload_del_domain_excel(self, args):
+        path = self.__SITE_DEL_FILE
+        rdata = self.upload_excel(args,path)
+        return rdata
+
+    def get_del_domain_list(self,args):
+
+        pass
+
+    def upload_excel(self, args,path):
         file = self.UploadFile(args)
-        df = pandas.read_excel(file)
+        df = pd.read_excel(file)
         json = df.to_json(orient='records')
-        path = self.__SITE_FILE
         if os.path.exists(path):
             os.remove(path)
         if not os.path.exists(path):
@@ -148,7 +170,7 @@ class batchsite_main:
     # 批量添加站点域名
     def add_domain_list(self, args):
         # 获取用户确认后的 site信息
-        # sites_data = self.get_read_file(self.__SITE_FILE)
+        # sites_data = self.get_read_file(self.__SITE_ADD_FILE)
         # result = {}
         # result['size'] = len(sites_data);
         # # data = json.loads(args.domain_info)
@@ -156,7 +178,7 @@ class batchsite_main:
         #     return {"status": "Success", "data":sites_data}
 
         data = json.loads(args.domain_info)
-        site_file = self.__SITE_FILE;
+        site_file = self.__SITE_ADD_FILE;
         sites_data = self.get_read_file(site_file)
 
         successSize = [];
@@ -253,7 +275,7 @@ class batchsite_main:
                 ?>
                 ''' % (site_obj.datauser, site_obj.datauser, site_obj.datapassword, domain)
             # 写入站点
-            public.WriteFile(site_obj.path + "/config.inc.php", PhpConfig.encode("GB2312"))
+            public.WriteFile(site_obj.path + "/config.inc.php", PhpConfig.encode("UTF-8"))
             # 删除原目录下的 install 文件夹
             os.popen("rm -rf " + site_obj.path + "/base/install/")
             file = dict_obj()
@@ -271,6 +293,51 @@ class batchsite_main:
     # return {"status": "Success", "site": {"Success": domain, "Failure": site_obj.datauser,
     #                                       "data_pass": site_obj.datapassword, "site_path": site_obj.path,
     #                                       "ftp_username": site_obj.ftp_username, "ftp_password": site_obj.ftp_password}}
+
+
+
+
+    # 获取宝塔 域名列表
+    def getBtData(self, args):
+        # data = json.loads(args.data)
+        site_obj = dict_obj()
+        site_obj.table = "sites"
+        site_obj.limit = 1000
+        site_obj.p = "1"
+        order = ""
+        if order == "desc":
+            site_obj.order = "id " + order
+        else:
+            site_obj.order = order
+        site_obj.type = "-1"
+
+        rdata = BT_DOMAIN_DATA.getData(site_obj)
+        attr = {'id', 'name'}
+        rdataList = []
+        for dic in rdata["data"]:
+            rdataDict = {key: value for key, value in dic.items() if key in attr}
+            rdataList.append(rdataDict)
+        frame = pd.DataFrame(rdataList)
+        exclePath = self.__ap_excle_path
+        frame.to_excel(exclePath)
+        if not os.path.exists(exclePath):
+            return public.returnMsg(False, 'DIR_NOT_EXISTS_ERR')
+        return {"status": "success", "path":exclePath}
+
+    def file_iterator(file_path, chunk_size=512):
+        """
+            文件读取迭代器
+        :param file_path:文件路径
+        :param chunk_size: 每次读取流大小
+        :return:
+        """
+        with open(file_path, 'rb') as target_file:
+            while True:
+                chunk = target_file.read(chunk_size)
+                if chunk:
+                    yield chunk
+                else:
+                    break
 
     # 判断域名是否存在
     def CheckDomainExist(self, cdomain):

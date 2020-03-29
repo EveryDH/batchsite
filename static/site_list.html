@@ -28,13 +28,9 @@
             <div class="layui-col-md12">
                 <div class="layui-card">
                     <div class="layui-card-header">
-                        <button type="button" class="layui-btn" id="uploadTxt"><i class="layui-icon"> </i>上传Excle
+                        <button type="button" class="layui-btn" id="uploadExcel"><i class="layui-icon"> </i>上传Excle
                         </button>
-                        <button class="layui-btn layui-btn-danger" onclick="saveSelect()"><i
-                                class="layui-icon"></i>批量添加
-                        </button>
-                        <button class="layui-btn" onclick="xadmin.open('添加HOST','host_add.html',500,300)"><i
-                                class="layui-icon"></i>添加
+                        <button class="layui-btn layui-btn-danger" onclick="saveSelect()">批量添加
                         </button>
                     </div>
                     <table class="layui-table layui-form" id="ServerListTable">
@@ -69,7 +65,6 @@
         load = layer.msg('加载 batchsite_config 配置中...', {
             time: false
         });
-        batchsite.get_bt_token();
         get_domain_list();
     });
 
@@ -79,8 +74,8 @@
 
         //指定允许上传的文件类型
         upload.render({
-            elem: '#uploadTxt'
-            , url: '/batchsite/upload_domain_excel.json'
+            elem: '#uploadExcel'
+            , url: '/batchsite/upload_add_domain_excel.json'
             , method: 'POST'  //可选项。HTTP类型，默认post
             , accept: 'file'
             , done:
@@ -127,6 +122,9 @@
                 $("#ServerListTable").html(tablehtml + "</tbody>");
                 layer.close(load);
                 form.render('checkbox');
+            } else if (rdata["status"] == "false") {
+                layer.close(load);
+                layer.msg(rdata["msg"]);
             }
         })
     }
