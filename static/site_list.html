@@ -89,7 +89,7 @@
 
     function get_add_domain_list() {
         request_plugin("batchsite", "get_add_domain_list", "", function (rdata) {
-            if (rdata["status"] == "Success") {
+            if (rdata["status"] == "success") {
                 var tablehtml =
                     ' <thead><tr><th><input type="checkbox"  lay-filter="checkall" name="" lay-skin="primary" onclick="SelectAll()"></th><th>ID</th><th>域名</th></th><th>二级域名</th> ' +
                     // '<th>数据库账号</th><th>数据库密码</th> <th>ftp账号</th><th>ftp密码</th><th>操作</th>' +

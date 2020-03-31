@@ -122,30 +122,31 @@ class batchsite_main:
         return {"data": data}
 
     # 使用 pandas 之前需要先执行: pip install pandas
-    # 上传 Excel 域名文件
+    # 上传 域名添加 Excel 文件
     def upload_add_domain_excel(self, args):
         path = self.__SITE_ADD_FILE
         rdata = self.upload_excel(args,path)
         return rdata
 
+    # 上传 域名删除 Excel 文件
     def upload_del_domain_excel(self, args):
         path = self.__SITE_DEL_FILE
         rdata = self.upload_excel(args,path)
         return rdata
 
+    # 获取上传删除域名 Excel 文件 返回json数据
     def get_del_domain_list(self,args):
         jsonFile = self.__SITE_DEL_FILE
-        self.get_domain_list(self, jsonFile)
-        pass
+        rdata = self.get_domain_list(jsonFile)
+        return rdata
 
+    # 获取上传添加域名 Excel 文件 返回json数据
     def get_add_domain_list(self, args):
         jsonFile = self.__SITE_ADD_FILE
-        self.get_domain_list(self, jsonFile)
-        pass
+        rdata = self.get_domain_list(jsonFile)
+        return rdata
 
     def get_domain_list(self, jsonFile):
-        # jsonFile = self.__SETUP_PATH + '/batchsite_config.json';
-        jsonFile = self.__SITE_ADD_FILE
         if not os.path.exists(jsonFile):
             return {"status": "False", "msg": "未上传Excel文件，请上传Excel文件"}
         data = json.loads(public.readFile(jsonFile));
@@ -155,7 +156,7 @@ class batchsite_main:
         data = tmp;
         result = {}
         result['data'] = data;
-        return {"status": "Success", "data": result['data']}
+        return {"status": "success", "data": result['data']}
 
     def upload_excel(self, args,path):
         file = self.UploadFile(args)
