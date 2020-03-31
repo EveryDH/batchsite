@@ -65,7 +65,7 @@
         load = layer.msg('加载 batchsite_config 配置中...', {
             time: false
         });
-        get_domain_list();
+        get_add_domain_list();
     });
 
     layui.use('upload', function () {
@@ -81,14 +81,14 @@
             , done:
                 function (res) {
                     layer.msg('上传成功');
-                    get_domain_list();
+                    get_add_domain_list();
                     console.log(res);
                 }
         });
     });
 
-    function get_domain_list() {
-        request_plugin("batchsite", "get_domain_list", "", function (rdata) {
+    function get_add_domain_list() {
+        request_plugin("batchsite", "get_add_domain_list", "", function (rdata) {
             if (rdata["status"] == "Success") {
                 var tablehtml =
                     ' <thead><tr><th><input type="checkbox"  lay-filter="checkall" name="" lay-skin="primary" onclick="SelectAll()"></th><th>ID</th><th>域名</th></th><th>二级域名</th> ' +
@@ -142,7 +142,7 @@
                             icon: 1,
                             time: 3000
                         });
-                        get_domain_list();
+                        get_add_domain_list();
                     }
                 })
             });
@@ -176,7 +176,7 @@
                 icon: 1,
                 time: 3000
             });
-            get_domain_list();
+            get_add_domain_list();
 
         });
     }
@@ -217,7 +217,7 @@
                 icon: 1,
                 time: 3000
             });
-            get_domain_list();
+            get_add_domain_list();
 
         });
     }

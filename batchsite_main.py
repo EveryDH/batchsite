@@ -116,20 +116,6 @@ class batchsite_main:
         BT_SITE.DeleteSite(site_obj)
         pass
 
-    def get_domain_list(self, args):
-        # jsonFile = self.__SETUP_PATH + '/batchsite_config.json';
-        jsonFile = self.__SITE_ADD_FILE
-        if not os.path.exists(jsonFile):
-            return {"status": "False", "msg": "未上传域名详情表，请上传Excel文件域名详情表!"}
-        data = json.loads(public.readFile(jsonFile));
-        tmp = [];
-        for d in data:
-            tmp.append(d);
-        data = tmp;
-        result = {}
-        result['data'] = data;
-        return {"status": "Success", "data": result['data']}
-
     # 上传 域名文件
     def upload_domain_txt(self, args):
         data = self.UploadFile(args)
@@ -148,8 +134,28 @@ class batchsite_main:
         return rdata
 
     def get_del_domain_list(self,args):
-
+        jsonFile = self.__SITE_DEL_FILE
+        self.get_domain_list(self, jsonFile)
         pass
+
+    def get_add_domain_list(self, args):
+        jsonFile = self.__SITE_ADD_FILE
+        self.get_domain_list(self, jsonFile)
+        pass
+
+    def get_domain_list(self, jsonFile):
+        # jsonFile = self.__SETUP_PATH + '/batchsite_config.json';
+        jsonFile = self.__SITE_ADD_FILE
+        if not os.path.exists(jsonFile):
+            return {"status": "False", "msg": "未上传Excel文件，请上传Excel文件"}
+        data = json.loads(public.readFile(jsonFile));
+        tmp = [];
+        for d in data:
+            tmp.append(d);
+        data = tmp;
+        result = {}
+        result['data'] = data;
+        return {"status": "Success", "data": result['data']}
 
     def upload_excel(self, args,path):
         file = self.UploadFile(args)
@@ -319,7 +325,7 @@ class batchsite_main:
             rdataList.append(rdataDict)
         frame = pd.DataFrame(rdataList)
         exclePath = self.__ap_excle_path
-        frame.to_excel(exclePath)
+        frame.to_excel(exclePath,index=False)
         if not os.path.exists(exclePath):
             return public.returnMsg(False, 'DIR_NOT_EXISTS_ERR')
         return {"status": "success", "path":exclePath}
