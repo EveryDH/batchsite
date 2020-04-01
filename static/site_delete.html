@@ -35,7 +35,7 @@
                             </button>
                             <button type="button" class="layui-btn" id="uploadExcel"><i class="layui-icon"> </i>上传Excle
                             </button>
-                            <button class="layui-btn layui-btn-danger" onclick="saveSelect()">批量删除
+                            <button class="layui-btn layui-btn-danger" onclick="delSelect()">批量删除
                             </button>
                             <!--                            <div class="layui-inline">-->
                             <!--                                <label class="layui-btn" name="oder">排序</label>-->
@@ -70,25 +70,42 @@
         version: '1583393622929' //为了更新 js 缓存，可忽略
     });
 
-    function GetFileBytes(fileName, fileSize) {
-        window.open('/download?filename=' + encodeURIComponent(fileName));
-    }
-
-    function downloadExcle() {
-        request_plugin("batchsite", "getBtData", {"data": sdata}, function (rdata) {
-            if (rdata["status"] == "success") {
-                GetFileBytes(rdata["path"])
-                layer.close(load);
-                form.render('checkbox');
-            } else if (rdata["status"] == "false") {
-                layer.close(load);
-                layer.msg(rdata["msg"]);
-            }
-        });
-    }
 
     var load;
     var layer;
+
+    layui.use('form', function () {
+        form = layui.form;
+
+        // 监听全选
+        form.on('checkbox(checkall)', function (data) {
+            if (data.elem.checked) $('tbody input').prop('checked', true);
+            else $('tbody input').prop('checked', false);
+            form.render('checkbox');
+        });
+
+        //监听提交
+        form.on('submit(submit-commit)', function (data) {
+            sdata = JSON.stringify(data.field)
+            console.log(sdata);
+            layer = layui.layer;
+            load = layer.msg('正在获取宝塔站点 请稍等...', {
+                time: false
+            });
+            downloadExcle()
+            // get_bt_domain_list(sdata);
+            return false
+        });
+    });
+
+
+    layui.use('layer', function () {
+        layer = layui.layer;
+        load = layer.msg('加载 配置中...', {
+            time: false
+        });
+        get_del_domain_list();
+    });
 
     layui.use('upload', function () {
         var $ = layui.jquery
@@ -106,24 +123,6 @@
                     get_del_domain_list();
                     console.log(res);
                 }
-        });
-    });
-
-
-    layui.use('form', function () {
-        form = layui.form;
-
-        //监听提交
-        form.on('submit(submit-commit)', function (data) {
-            sdata = JSON.stringify(data.field)
-            console.log(sdata);
-            layer = layui.layer;
-            load = layer.msg('正在获取宝塔站点 请稍等...', {
-                time: false
-            });
-            downloadExcle()
-            // get_bt_domain_list(sdata);
-            return false
         });
     });
 
@@ -146,21 +145,24 @@
             });
         });*/
 
+
     function get_del_domain_list() {
         request_plugin("batchsite", "get_del_domain_list", "", function (rdata) {
             if (rdata["status"] == "success") {
                 var tablehtml =
-                    ' <thead><tr><th><input type="checkbox"  lay-filter="checkall" name="" lay-skin="primary" onclick="SelectAll()"></th><th>ID</th><th>域名</th></th>' +
+                    ' <thead><tr><th><input type="checkbox"  lay-filter="checkall" name="" lay-skin="primary" onclick="SelectAll()"></th><th>ID</th><th>域名</th><th>路径</th></th>' +
                     // '<th>数据库账号</th><th>数据库密码</th> <th>ftp账号</th><th>ftp密码</th><th>操作</th>' +
                     '</tr></thead><tbody>\n';
                 for (var i = 0; i < rdata.data.length; i++) {
                     id = rdata.data[i].id;
                     domain = rdata.data[i].name;
+                    path = rdata.data[i].path;
                     tablehtml = tablehtml + "<tr><td>" + '<input type="checkbox" name="SiteList" value="' +
-                        id + ',' + domain +
+                        id + ',' + domain + ',' + path +
                         '"  lay-skin="primary"  >' +
                         "</td><td>" + id +
                         "</td><td>" + domain +
+                        "</td><td>" + path +
                         "\n";
                 }
                 $("#ServerListTable").html(tablehtml + "</tbody>");
@@ -173,87 +175,31 @@
         })
     }
 
-    /*    function get_bt_domain_list(sdata) {
-            request_plugin("batchsite", "getBtData", {"data": sdata}, function (rdata) {
-                if (rdata["status"] == "success") {
-                    var tablehtml =
-                        ' <thead><tr><th><input type="checkbox"  lay-filter="checkall" name="" lay-skin="primary" onclick="SelectAll()"></th><th>ID</th><th>域名</th></th>' +
-                        // '<th>数据库账号</th><th>数据库密码</th> <th>ftp账号</th><th>ftp密码</th><th>操作</th>' +
-                        '</tr></thead><tbody>\n';
-                    for (var i = 0; i < rdata.data.data.length; i++) {
-                        id = rdata.data.data[i].id;
-                        domain = rdata.data.data[i].name;
-                        tablehtml = tablehtml + "<tr><td>" + '<input type="checkbox" name="SiteList" value="' +
-                            id + ',' + domain +
-                            '"  lay-skin="primary"  >' +
-                            "</td><td>" + id +
-                            "</td><td>" + domain +
-                            "\n";
+    /*
+        function delSelect() {
+            layer.confirm('确认要删除这些记录吗？', function (index) {
+                checkbox = $("[name='SiteList']");
+                num = checkbox.length;
+                for (var i = 0; i < num; i++) {
+                    dom = checkbox[i];
+                    if (dom.checked) {
+                        host = dom.value;
+                        member_del(0, host);
                     }
-                    $("#ServerListTable").html(tablehtml + "</tbody>");
-                    layer.close(load);
-                    form.render('checkbox');
-                } else if (rdata["status"] == "false") {
-                    layer.close(load);
-                    layer.msg(rdata["msg"]);
-                }
-            })
-        }*/
 
-    function member_del(type, host) {
-        if (type == 1) {
-            layer.confirm('确认要删除吗？', function (index) {
-                $.ajax({
-                    url: "/batchsite/DelDomainConfig.json",
-                    type: "POST",
-                    data: "domain=" + host,
-                    dataType: "JSON",
-                    success: function (rdata) {
-                        layer.msg(rdata["msg"], {
-                            icon: 1,
-                            time: 3000
-                        });
-                        get_domain_list();
-                    }
-                })
-            });
-        } else {
-            $.ajax({
-                url: "/batchsite/DelDomainConfig.json",
-                type: "POST",
-                data: "domain=" + host,
-                dataType: "JSON",
-                success: function (rdata) {
-                    console.log(rdata["msg"]);
                 }
+                layer.msg('批量删除成功!', {
+                    icon: 1,
+                    time: 3000
+                });
+                get_domain_list();
+
             });
         }
-    }
-
+    */
 
     function delSelect() {
         layer.confirm('确认要删除这些记录吗？', function (index) {
-            checkbox = $("[name='SiteList']");
-            num = checkbox.length;
-            for (var i = 0; i < num; i++) {
-                dom = checkbox[i];
-                if (dom.checked) {
-                    host = dom.value;
-                    member_del(0, host);
-                }
-
-            }
-            layer.msg('批量删除成功!', {
-                icon: 1,
-                time: 3000
-            });
-            get_domain_list();
-
-        });
-    }
-
-    function saveSelect() {
-        layer.confirm('确认要保存这些记录吗？', function (index) {
             checkbox = $("[name='SiteList']");
             num = checkbox.length;
             // var siteList = [];
@@ -265,31 +211,25 @@
                     var site_obj = {};
                     data = dom.value
                     var arraydata = data.split(',')
-                    site_obj.domain = arraydata[0];
-                    site_obj.second_domain = arraydata[1];
-                    site_obj.datauser = arraydata[2];
-                    site_obj.datapassword = arraydata[3];
-                    site_obj.ftp_username = arraydata[4];
-                    site_obj.ftp_password = arraydata[5];
+                    site_obj.id = arraydata[0];
+                    site_obj.name = arraydata[1];
+                    site_obj.path = arraydata[2];
                     siteList.push(site_obj)
                 }
             }
             console.log("before", siteList)
-            request_plugin("batchsite", "save_domain_list", {
+            request_plugin("batchsite", "del_domain_list", {
                 "siteList": JSON.stringify(siteList)
             }, function (rdata) {
-                layer.msg('批量添加成功! 共添加： ' + rdata.size + ' 个', {
+                layer.msg('批量删除成功! 共删除： ' + rdata.size + ' 个', {
                     icon: 1,
                     time: 3000
                 });
             })
-            // member_save(siteList);
             layer.msg('批量添加成功!', {
                 icon: 1,
                 time: 3000
             });
-            get_domain_list();
-
         });
     }
 
@@ -303,6 +243,23 @@
                 });
                 console.log(rdata)
             })
+        });
+    }
+
+    function GetFileBytes(fileName, fileSize) {
+        window.open('/download?filename=' + encodeURIComponent(fileName));
+    }
+
+    function downloadExcle() {
+        request_plugin("batchsite", "getBtData", {"data": sdata}, function (rdata) {
+            if (rdata["status"] == "success") {
+                GetFileBytes(rdata["path"])
+                layer.close(load);
+                form.render('checkbox');
+            } else if (rdata["status"] == "false") {
+                layer.close(load);
+                layer.msg(rdata["msg"]);
+            }
         });
     }
 

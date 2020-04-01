@@ -102,19 +102,7 @@ class batchsite_main:
         sites_data = json.loads(public.ReadFile(filePath))
         return sites_data
 
-    def delete_domain_list(self, args):
 
-        data = json.loads(args.domain_info)
-        site_file = self.__SITE_ADD_FILE;
-        sites_data = self.get_read_file(site_file)
-        successSize = [];
-        failureSize = [];
-        site_obj = dict_obj()
-        site_obj.id = data["id"]
-        site_obj.webname = data["webname"]
-        site_obj.path = data["path"]
-        BT_SITE.DeleteSite(site_obj)
-        pass
 
     # 上传 域名文件
     def upload_domain_txt(self, args):
@@ -148,7 +136,7 @@ class batchsite_main:
 
     def get_domain_list(self, jsonFile):
         if not os.path.exists(jsonFile):
-            return {"status": "False", "msg": "未上传Excel文件，请上传Excel文件"}
+            return {"status": "false", "msg": "未上传Excel文件，请上传Excel文件"}
         data = json.loads(public.readFile(jsonFile));
         tmp = [];
         for d in data:
@@ -173,6 +161,23 @@ class batchsite_main:
         from flask import request
         file = request.files['file']
         return file
+
+    # 批量删除 站点
+    def del_domain_list(self, args):
+        data = json.loads(args.domain_info)
+        site_file = self.__SITE_DEL_FILE;
+        sites_data = self.get_read_file(site_file)
+        successSize = [];
+        failureSize = [];
+
+        for site in sites_data:
+            site_obj = dict_obj()
+            site_obj.id = data["id"]
+            site_obj.webname = data["webname"]
+            site_obj.path = data["path"]
+            BT_SITE.DeleteSite(site_obj)
+
+        pass
 
     # 批量添加站点域名
     def add_domain_list(self, args):
@@ -302,8 +307,6 @@ class batchsite_main:
     #                                       "ftp_username": site_obj.ftp_username, "ftp_password": site_obj.ftp_password}}
 
 
-
-
     # 获取宝塔 域名列表
     def getBtData(self, args):
         # data = json.loads(args.data)
@@ -319,7 +322,7 @@ class batchsite_main:
         site_obj.type = "-1"
 
         rdata = BT_DOMAIN_DATA.getData(site_obj)
-        attr = {'id', 'name'}
+        attr = {'id', 'name', 'path'}
         rdataList = []
         for dic in rdata["data"]:
             rdataDict = {key: value for key, value in dic.items() if key in attr}
