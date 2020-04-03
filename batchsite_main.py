@@ -39,6 +39,7 @@ class dict_obj:
 
     def get_items(self): return self
 
+
 cacheDict = {}
 cacheList = []
 
@@ -47,6 +48,7 @@ from flask import session, Response
 # 在非命令行模式下引用面板缓存和session对象
 if __name__ != '__main__':
     from BTPanel import cache, session, redirect
+
 
 class batchsite_main:
     __SETUP_PATH = 'plugin/batchsite'
@@ -61,7 +63,6 @@ class batchsite_main:
     __domain_excle = 'domain.xlsx'
     __excle_path = __CONFIG + __domain_excle
     __ap_excle_path = __PLUGIN_PATH + __domain_excle
-
 
     # 构造方法
     def __init__(self):
@@ -102,8 +103,6 @@ class batchsite_main:
         sites_data = json.loads(public.ReadFile(filePath))
         return sites_data
 
-
-
     # 上传 域名文件
     def upload_domain_txt(self, args):
         data = self.UploadFile(args)
@@ -113,17 +112,17 @@ class batchsite_main:
     # 上传 域名添加 Excel 文件
     def upload_add_domain_excel(self, args):
         path = self.__SITE_ADD_FILE
-        rdata = self.upload_excel(args,path)
+        rdata = self.upload_excel(args, path)
         return rdata
 
     # 上传 域名删除 Excel 文件
     def upload_del_domain_excel(self, args):
         path = self.__SITE_DEL_FILE
-        rdata = self.upload_excel(args,path)
+        rdata = self.upload_excel(args, path)
         return rdata
 
     # 获取上传删除域名 Excel 文件 返回json数据
-    def get_del_domain_list(self,args):
+    def get_del_domain_list(self, args):
         jsonFile = self.__SITE_DEL_FILE
         rdata = self.get_domain_list(jsonFile)
         return rdata
@@ -146,7 +145,7 @@ class batchsite_main:
         result['data'] = data;
         return {"status": "success", "data": result['data']}
 
-    def upload_excel(self, args,path):
+    def upload_excel(self, args, path):
         file = self.UploadFile(args)
         df = pd.read_excel(file)
         json = df.to_json(orient='records')
@@ -164,20 +163,30 @@ class batchsite_main:
 
     # 批量删除 站点
     def del_domain_list(self, args):
-        data = json.loads(args.domain_info)
-        site_file = self.__SITE_DEL_FILE;
-        sites_data = self.get_read_file(site_file)
+        data = json.loads(args.siteList)
+        # site_file = self.__SITE_DEL_FILE;
+        # sites_data = self.get_read_file(site_file)
         successSize = [];
         failureSize = [];
 
-        for site in sites_data:
+        for site in data:
             site_obj = dict_obj()
-            site_obj.id = data["id"]
-            site_obj.webname = data["webname"]
-            site_obj.path = data["path"]
-            BT_SITE.DeleteSite(site_obj)
-
-        pass
+            site_obj.id = site["id"]
+            site_obj.webname = site["name"]
+            site_obj.path = site["path"]
+            site["database"] = '1'
+            site["ftp"] = '1'
+            site_obj.database = site['database']
+            site_obj.ftp = site['ftp']
+            # 批量删除站点
+            data = BT_SITE.DeleteSite(site_obj)
+            if data['status'] == True:
+                successSize.append(data.copy())
+            if data['status'] == False:
+                failureSize.append(data.copy())
+        count = successSize + failureSize
+        return {"status": "success", "site":
+            {"count": len(count), "successSize": len(successSize), "failureSize": len(failureSize)}}
 
     # 批量添加站点域名
     def add_domain_list(self, args):
@@ -268,24 +277,24 @@ class batchsite_main:
             # 修改配置文件
             # 构建PHP 的配置文件
             PhpConfig = '''<?php
-                #[数据库参数]
-                $dbHost="127.0.0.1";
-                $dbName="%s";
-                $dbUser="%s";
-                $dbPass="%s";
-
-                #[数据表前缀]
-                $TablePre="dev";
-
-                #[语言]
-                $sLan="zh_cn";
-
-                #[网址]
-                $SiteUrl="http://%s";
-
-                #----------------------------------#
-                ?>
-                ''' % (site_obj.datauser, site_obj.datauser, site_obj.datapassword, domain)
+                    #[数据库参数]
+                    $dbHost="127.0.0.1";
+                    $dbName="%s";
+                    $dbUser="%s";
+                    $dbPass="%s";
+    
+                    #[数据表前缀]
+                    $TablePre="dev";
+    
+                    #[语言]
+                    $sLan="zh_cn";
+    
+                    #[网址]
+                    $SiteUrl="http://%s";
+    
+                    #----------------------------------#
+                    ?>
+                    ''' % (site_obj.datauser, site_obj.datauser, site_obj.datapassword, domain)
             # 写入站点
             public.WriteFile(site_obj.path + "/config.inc.php", PhpConfig.encode("UTF-8"))
             # 删除原目录下的 install 文件夹
@@ -305,7 +314,6 @@ class batchsite_main:
     # return {"status": "Success", "site": {"Success": domain, "Failure": site_obj.datauser,
     #                                       "data_pass": site_obj.datapassword, "site_path": site_obj.path,
     #                                       "ftp_username": site_obj.ftp_username, "ftp_password": site_obj.ftp_password}}
-
 
     # 获取宝塔 域名列表
     def getBtData(self, args):
@@ -329,10 +337,10 @@ class batchsite_main:
             rdataList.append(rdataDict)
         frame = pd.DataFrame(rdataList)
         exclePath = self.__ap_excle_path
-        frame.to_excel(exclePath,index=False)
+        frame.to_excel(exclePath, index=False)
         if not os.path.exists(exclePath):
             return public.returnMsg(False, 'DIR_NOT_EXISTS_ERR')
-        return {"status": "success", "path":exclePath}
+        return {"status": "success", "path": exclePath}
 
     def file_iterator(file_path, chunk_size=512):
         """

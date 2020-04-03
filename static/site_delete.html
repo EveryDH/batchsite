@@ -21,55 +21,51 @@
 
     </style>
 </head>
-
 <body>
-<form class="layui-form">
-    <table class="layui-table">
-        <div class="layui-fluid">
-            <div class="layui-row layui-col-space15">
-                <div class="layui-col-md12">
-                    <div class="layui-card">
-                        <div class="layui-card-header">
-                            <button type="submit" class="layui-btn" lay-submit="" lay-filter="submit-commit">
-                                下载所有站点
-                            </button>
-                            <button type="button" class="layui-btn" id="uploadExcel"><i class="layui-icon"> </i>上传Excle
-                            </button>
-                            <button class="layui-btn layui-btn-danger" onclick="delSelect()">批量删除
-                            </button>
-                            <!--                            <div class="layui-inline">-->
-                            <!--                                <label class="layui-btn" name="oder">排序</label>-->
-                            <!--                                <div class="layui-input-inline" style="width: 80px;">-->
-                            <!--                                    <select name="order" style="">-->
-                            <!--                                        <option value="asc">升序</option>-->
-                            <!--                                        <option value="desc">降序</option>-->
-                            <!--                                    </select>-->
-                            <!--                                </div>-->
-                            <!--                            </div>-->
-                            <!--                            <div class="layui-inline">-->
-                            <!--                                <label class="layui-btn">站点数量</label>-->
-                            <!--                                <div class="layui-input-inline">-->
-                            <!--                                    <input value="100" type="tel" name="limit"-->
-                            <!--                                           class="layui-input" style="width: 50px">-->
-                            <!--                                </div>-->
-                            <!--                            </div>&nbsp;&nbsp;&nbsp;&nbsp;-->
+<table class="layui-table">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header">
+                        <button type="button" class="layui-btn" onclick="downloadExcle()">
+                            下载所有站点
+                        </button>
+                        <button type="button" class="layui-btn" id="uploadExcel"><i class="layui-icon"> </i>上传Excle
+                        </button>
+                        <button class="layui-btn layui-btn-danger" onclick="delSelect()">批量删除
+                        </button>
+                        <!--                            <div class="layui-inline">-->
+                        <!--                                <label class="layui-btn" name="oder">排序</label>-->
+                        <!--                                <div class="layui-input-inline" style="width: 80px;">-->
+                        <!--                                    <select name="order" style="">-->
+                        <!--                                        <option value="asc">升序</option>-->
+                        <!--                                        <option value="desc">降序</option>-->
+                        <!--                                    </select>-->
+                        <!--                                </div>-->
+                        <!--                            </div>-->
+                        <!--                            <div class="layui-inline">-->
+                        <!--                                <label class="layui-btn">站点数量</label>-->
+                        <!--                                <div class="layui-input-inline">-->
+                        <!--                                    <input value="100" type="tel" name="limit"-->
+                        <!--                                           class="layui-input" style="width: 50px">-->
+                        <!--                                </div>-->
+                        <!--                            </div>&nbsp;&nbsp;&nbsp;&nbsp;-->
 
 
-                        </div>
-                        <table class="layui-table layui-form" id="ServerListTable">
-                        </table>
                     </div>
+                    <table class="layui-table layui-form" id="ServerListTable">
+                    </table>
                 </div>
             </div>
         </div>
-    </table>
-</form>
+    </div>
+</table>
 </body>
 <script>
     layui.config({
         version: '1583393622929' //为了更新 js 缓存，可忽略
     });
-
 
     var load;
     var layer;
@@ -84,18 +80,17 @@
             form.render('checkbox');
         });
 
-        //监听提交
-        form.on('submit(submit-commit)', function (data) {
-            sdata = JSON.stringify(data.field)
-            console.log(sdata);
-            layer = layui.layer;
-            load = layer.msg('正在获取宝塔站点 请稍等...', {
-                time: false
-            });
-            downloadExcle()
-            // get_bt_domain_list(sdata);
-            return false
-        });
+        /*       //监听提交
+               form.on('button(submit-commit)', function (data) {
+                   sdata = JSON.stringify(data.field)
+                   console.log(sdata);
+                   layer = layui.layer;
+                   load = layer.msg('正在获取宝塔站点 请稍等...', {
+                       time: false
+                   });
+                   downloadExcle();
+                   return false
+               });*/
     });
 
 
@@ -221,15 +216,25 @@
             request_plugin("batchsite", "del_domain_list", {
                 "siteList": JSON.stringify(siteList)
             }, function (rdata) {
-                layer.msg('批量删除成功! 共删除： ' + rdata.size + ' 个', {
-                    icon: 1,
-                    time: 3000
-                });
-            })
-            layer.msg('批量添加成功!', {
-                icon: 1,
-                time: 3000
-            });
+                if (rdata["status"] == "success") {
+                    layer.close(load);
+                    layer.open({
+                        type: 1,
+                        title: "一键安装成功!",
+                        closeBtn: 1,
+                        anim: 2,
+                        area: ['650px', '300px'],
+                        content: '<div class="success-msg"><div class="pic"> <img src="/static/img/success-pic.png" style="width: 150px; margin-top: 30px;"></div>' +
+                            '<div class="suc-con">' +
+                            '<p class="p1">批量建站结果</p>' +
+                            '<p><span>共批量删除站点 ：</span><strong>' + rdata.site.count + '</strong></p><p>' +
+                            '<p><span>成功批量删除站点 ：</span><strong>' + rdata.site.successSize + '</strong></p>' +
+                            '<p><span>失败批量删除站点</span><strong>' + rdata.site.failureSize + '</strong></p>' +
+                            '<p style="margin-bottom: 19px; margin-top: 11px; color: #666"></p>' +
+                            '</div></div>'
+                    })
+                }
+            }, false)
         });
     }
 
@@ -251,7 +256,7 @@
     }
 
     function downloadExcle() {
-        request_plugin("batchsite", "getBtData", {"data": sdata}, function (rdata) {
+        request_plugin("batchsite", "getBtData", "", function (rdata) {
             if (rdata["status"] == "success") {
                 GetFileBytes(rdata["path"])
                 layer.close(load);
