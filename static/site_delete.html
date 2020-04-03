@@ -93,14 +93,14 @@
                });*/
     });
 
-/*
-    layui.use('layer', function () {
-        layer = layui.layer;
-        load = layer.msg('加载 配置中...', {
-            time: false
-        });
-        getDelDomainList();
-    });*/
+    /*
+        layui.use('layer', function () {
+            layer = layui.layer;
+            load = layer.msg('加载 配置中...', {
+                time: false
+            });
+            getDelDomainList();
+        });*/
 
     layui.use('upload', function () {
         var $ = layui.jquery
@@ -195,6 +195,7 @@
 
     function delSelect() {
         layer.confirm('确认要删除这些记录吗？', function (index) {
+            layer.closeAll('dialog');
             checkbox = $("[name='SiteList']");
             num = checkbox.length;
             // var siteList = [];
