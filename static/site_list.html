@@ -65,7 +65,7 @@
         load = layer.msg('加载 batchsite_config 配置中...', {
             time: false
         });
-        get_add_domain_list();
+        getAddDomainList();
     });
 
     layui.use('upload', function () {
@@ -75,20 +75,20 @@
         //指定允许上传的文件类型
         upload.render({
             elem: '#uploadExcel'
-            , url: '/batchsite/upload_add_domain_excel.json'
+            , url: '/batchsite/uploadAddDomainExcel.json'
             , method: 'POST'  //可选项。HTTP类型，默认post
             , accept: 'file'
             , done:
                 function (res) {
                     layer.msg('上传成功');
-                    get_add_domain_list();
+                    getAddDomainList();
                     console.log(res);
                 }
         });
     });
 
-    function get_add_domain_list() {
-        request_plugin("batchsite", "get_add_domain_list", "", function (rdata) {
+    function getAddDomainList() {
+        request_plugin("batchsite", "getAddDomainList", "", function (rdata) {
             if (rdata["status"] == "success") {
                 var tablehtml =
                     ' <thead><tr><th><input type="checkbox"  lay-filter="checkall" name="" lay-skin="primary" onclick="SelectAll()"></th><th>ID</th><th>域名</th></th><th>二级域名</th> ' +
@@ -142,7 +142,7 @@
                             icon: 1,
                             time: 3000
                         });
-                        get_add_domain_list();
+                        getAddDomainList();
                     }
                 })
             });
@@ -176,7 +176,7 @@
                 icon: 1,
                 time: 3000
             });
-            get_add_domain_list();
+            getAddDomainList();
 
         });
     }
@@ -204,7 +204,7 @@
                 }
             }
             console.log("before", siteList)
-            request_plugin("batchsite", "save_domain_list", {
+            request_plugin("batchsite", "saveDomainList", {
                 "siteList": JSON.stringify(siteList)
             }, function (rdata) {
                 layer.msg('批量添加成功! 共添加： ' + rdata.size + ' 个', {
@@ -217,7 +217,7 @@
                 icon: 1,
                 time: 3000
             });
-            get_add_domain_list();
+            getAddDomainList();
 
         });
     }
@@ -225,7 +225,7 @@
     function member_save(siteList) {
         console.log(siteList)
         layer.confirm('确认要添加吗？', function (index) {
-            request_plugin("batchsite", "save_domain_list", "", function (rdata) {
+            request_plugin("batchsite", "saveDomainList", "", function (rdata) {
                 layer.msg('批量添加成功! 共添加： ' + rdata + ' 个', {
                     icon: 1,
                     time: 3000

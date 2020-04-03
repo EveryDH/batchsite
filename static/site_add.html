@@ -178,7 +178,7 @@
     layui.use('form', function () {
         form = layui.form;
         OptionCodeList();
-        OptionPHPVersion();
+        optionPHPVersion();
     });
     form.render();
 
@@ -190,12 +190,12 @@
         load = layer.msg('批量建设站点中 请稍等...', {
             time: false
         });
-        add_domain_list(sdata);
+        addDomainList(sdata);
         return false
     });
 
-    function add_domain_list(sdata) {
-        request_plugin("batchsite", "add_domain_list", {'domain_info': sdata}, function (rdata) {
+    function addDomainList(sdata) {
+        request_plugin("batchsite", "addDomainList", {'domain_info': sdata}, function (rdata) {
             if (rdata["status"] == "Success") {
                 layer.close(load);
                 layer.open({
@@ -214,12 +214,12 @@
                         '</div></div>'
                 })
             }
-        }, false)
+        }, 1800000)
     }
 
     // 搜索当前的可用插件的安装包
     function OptionCodeList() {
-        request_plugin("batchsite", "GetInstallList", "", function (rdata) {
+        request_plugin("batchsite", "getInstallList", "", function (rdata) {
             if (rdata["status"] == "Success") {
                 console.log(rdata["List"]);
                 for (var i = 0; i < rdata["List"].length; i++) {
@@ -231,8 +231,8 @@
     }
 
         // 搜索当前的可用插件的安装包
-    function OptionPHPVersion() {
-        request_plugin("batchsite", "OptionPHPVersion", "", function (rdata) {
+    function optionPHPVersion() {
+        request_plugin("batchsite", "optionPHPVersion", "", function (rdata) {
             if (rdata["status"] == "Success") {
                 // var html = '';
                 console.log(rdata["list"]);

@@ -93,14 +93,14 @@
                });*/
     });
 
-
+/*
     layui.use('layer', function () {
         layer = layui.layer;
         load = layer.msg('加载 配置中...', {
             time: false
         });
-        get_del_domain_list();
-    });
+        getDelDomainList();
+    });*/
 
     layui.use('upload', function () {
         var $ = layui.jquery
@@ -109,13 +109,13 @@
         //指定允许上传的文件类型
         upload.render({
             elem: '#uploadExcel'
-            , url: '/batchsite/upload_del_domain_excel.json'
+            , url: '/batchsite/uploadDelDomainExcel.json'
             , method: 'POST'  //可选项。HTTP类型，默认post
             , accept: 'file'
             , done:
                 function (res) {
                     layer.msg('上传成功');
-                    get_del_domain_list();
+                    getDelDomainList();
                     console.log(res);
                 }
         });
@@ -134,15 +134,15 @@
                 , done:
                     function (res) {
                         layer.msg('上传成功');
-                        get_domain_list();
+                        getDomainList();
                         console.log(res);
                     }
             });
         });*/
 
 
-    function get_del_domain_list() {
-        request_plugin("batchsite", "get_del_domain_list", "", function (rdata) {
+    function getDelDomainList() {
+        request_plugin("batchsite", "getDelDomainList", "", function (rdata) {
             if (rdata["status"] == "success") {
                 var tablehtml =
                     ' <thead><tr><th><input type="checkbox"  lay-filter="checkall" name="" lay-skin="primary" onclick="SelectAll()"></th><th>ID</th><th>域名</th><th>路径</th></th>' +
@@ -187,7 +187,7 @@
                     icon: 1,
                     time: 3000
                 });
-                get_domain_list();
+                getDomainList();
 
             });
         }
@@ -213,14 +213,14 @@
                 }
             }
             console.log("before", siteList)
-            request_plugin("batchsite", "del_domain_list", {
+            request_plugin("batchsite", "delDomainList", {
                 "siteList": JSON.stringify(siteList)
             }, function (rdata) {
                 if (rdata["status"] == "success") {
                     layer.close(load);
                     layer.open({
                         type: 1,
-                        title: "一键安装成功!",
+                        title: "一键批量删除站点!",
                         closeBtn: 1,
                         anim: 2,
                         area: ['650px', '300px'],
@@ -234,14 +234,14 @@
                             '</div></div>'
                     })
                 }
-            }, false)
+            }, 1800000)
         });
     }
 
     function member_save(siteList) {
         console.log(siteList)
         layer.confirm('确认要添加吗？', function (index) {
-            request_plugin("batchsite", "save_domain_list", "", function (rdata) {
+            request_plugin("batchsite", "saveDomainList", "", function (rdata) {
                 layer.msg('批量添加成功! 共添加： ' + rdata + ' 个', {
                     icon: 1,
                     time: 3000

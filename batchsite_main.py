@@ -7,9 +7,8 @@
 # +-------------------------------------------------------------------
 # |   宝塔批量建站工具 batchsite
 # +-------------------------------------------------------------------
-import io, re, public, os, sys, json, panelSite, database, files, ftp, copy, site, pandas as pd, data
-from openpyxl.workbook import Workbook
-from flask import send_file, send_from_directory
+import io, re, public, os, sys, json, panelSite, database, \
+    files, ftp, copy, site, pandas as pd, data
 
 # 设置运行目录
 os.chdir("/www/server/panel")
@@ -39,11 +38,6 @@ class dict_obj:
 
     def get_items(self): return self
 
-
-cacheDict = {}
-cacheList = []
-
-from flask import session, Response
 
 # 在非命令行模式下引用面板缓存和session对象
 if __name__ != '__main__':
@@ -77,11 +71,11 @@ class batchsite_main:
             os.mkdir(self.__bag_path)
 
     # 保存domain list数据到local
-    def save_domain_list(self, args):
+    def saveDomainList(self, args):
         if not 'siteList' in args: return public.returnMsg(False, '参数不正确!')
         siteList = json.loads(args.siteList)
         site_file = self.__SITE_ADD_FILE;
-        self.set_write_file(siteList, site_file)
+        self.setWriteFile(siteList, site_file)
         if os.path.exists(self.__SITE_ADD_FILE):
             result = {}
             result['size'] = len(siteList);
@@ -90,50 +84,50 @@ class batchsite_main:
             return public.returnMsg(False, 'DIR_DEL_ERR')
 
     #  通用替换文件 写入
-    def set_write_file(self, args, filePath):
+    def setWriteFile(self, args, filePath):
         if os.path.exists(filePath):
             os.remove(filePath)
         if not os.path.exists(filePath):
             public.WriteFile(filePath, json.dumps(args))
 
     #  通用替换文件 读取
-    def get_read_file(self, filePath):
+    def getReadFile(self, filePath):
         if not os.path.exists(filePath):
             return public.returnMsg(False, 'DIR_NOT_EXISTS_ERR')
         sites_data = json.loads(public.ReadFile(filePath))
         return sites_data
 
     # 上传 域名文件
-    def upload_domain_txt(self, args):
+    def uploadDomainTxt(self, args):
         data = self.UploadFile(args)
         return {"data": data}
 
     # 使用 pandas 之前需要先执行: pip install pandas
     # 上传 域名添加 Excel 文件
-    def upload_add_domain_excel(self, args):
+    def uploadAddDomainExcel(self, args):
         path = self.__SITE_ADD_FILE
-        rdata = self.upload_excel(args, path)
+        rdata = self.uploadExcel(args, path)
         return rdata
 
     # 上传 域名删除 Excel 文件
-    def upload_del_domain_excel(self, args):
+    def uploadDelDomainExcel(self, args):
         path = self.__SITE_DEL_FILE
-        rdata = self.upload_excel(args, path)
+        rdata = self.uploadExcel(args, path)
         return rdata
 
     # 获取上传删除域名 Excel 文件 返回json数据
-    def get_del_domain_list(self, args):
+    def getDelDomainList(self, args):
         jsonFile = self.__SITE_DEL_FILE
-        rdata = self.get_domain_list(jsonFile)
+        rdata = self.getDomainList(jsonFile)
         return rdata
 
     # 获取上传添加域名 Excel 文件 返回json数据
-    def get_add_domain_list(self, args):
+    def getAddDomainList(self, args):
         jsonFile = self.__SITE_ADD_FILE
-        rdata = self.get_domain_list(jsonFile)
+        rdata = self.getDomainList(jsonFile)
         return rdata
 
-    def get_domain_list(self, jsonFile):
+    def getDomainList(self, jsonFile):
         if not os.path.exists(jsonFile):
             return {"status": "false", "msg": "未上传Excel文件，请上传Excel文件"}
         data = json.loads(public.readFile(jsonFile));
@@ -145,7 +139,7 @@ class batchsite_main:
         result['data'] = data;
         return {"status": "success", "data": result['data']}
 
-    def upload_excel(self, args, path):
+    def uploadExcel(self, args, path):
         file = self.UploadFile(args)
         df = pd.read_excel(file)
         json = df.to_json(orient='records')
@@ -162,10 +156,10 @@ class batchsite_main:
         return file
 
     # 批量删除 站点
-    def del_domain_list(self, args):
+    def delDomainList(self, args):
         data = json.loads(args.siteList)
         # site_file = self.__SITE_DEL_FILE;
-        # sites_data = self.get_read_file(site_file)
+        # sites_data = self.getReadFile(site_file)
         successSize = [];
         failureSize = [];
 
@@ -185,13 +179,14 @@ class batchsite_main:
             if data['status'] == False:
                 failureSize.append(data.copy())
         count = successSize + failureSize
-        return {"status": "success", "site":
-            {"count": len(count), "successSize": len(successSize), "failureSize": len(failureSize)}}
+        return {"status": "success",
+                "site": {"count": len(count), "successSize": len(successSize), "failureSize": len(failureSize)}
+                }
 
     # 批量添加站点域名
-    def add_domain_list(self, args):
+    def addDomainList(self, args):
         # 获取用户确认后的 site信息
-        # sites_data = self.get_read_file(self.__SITE_ADD_FILE)
+        # sites_data = self.getReadFile(self.__SITE_ADD_FILE)
         # result = {}
         # result['size'] = len(sites_data);
         # # data = json.loads(args.domain_info)
@@ -200,7 +195,7 @@ class batchsite_main:
 
         data = json.loads(args.domain_info)
         site_file = self.__SITE_ADD_FILE;
-        sites_data = self.get_read_file(site_file)
+        sites_data = self.getReadFile(site_file)
 
         successSize = [];
         failureSize = [];
@@ -209,7 +204,7 @@ class batchsite_main:
         for site in sites_data:
             domain = site["domain"]
             second_domain = site["second_domain"]
-            # if self.CheckDomainExist(domain):
+            # if self.checkDomainExist(domain):
             #     return {"status": "error", "msg": "试图添加的域名[" + domain + "]已经存在！"}
 
             # 构造创建网站必须的参数
@@ -241,7 +236,7 @@ class batchsite_main:
             # 保存 建站日志到 本地
             # resultSize.append(successSize)
             # resultSize.append(failureSize)
-            # self.set_write_file(successSize, self.__PLUGIN_RESULT_LOG)
+            # self.setWriteFile(successSize, self.__PLUGIN_RESULT_LOG)
             # return {"status": "Success", "failureSize": failureSize}
 
             # 删除网站目录下的所有无用的文件
@@ -307,7 +302,7 @@ class batchsite_main:
             files.files().SetFileAccess(file)
 
         count = successSize + failureSize
-        self.set_write_file(successSize, self.__PLUGIN_RESULT_LOG)
+        self.setWriteFile(successSize, self.__PLUGIN_RESULT_LOG)
         return {"status": "Success", "site":
             {"count": len(count), "successSize": len(successSize), "failureSize": len(failureSize)}}
 
@@ -320,7 +315,7 @@ class batchsite_main:
         # data = json.loads(args.data)
         site_obj = dict_obj()
         site_obj.table = "sites"
-        site_obj.limit = 1000
+        site_obj.limit = 2000
         site_obj.p = "1"
         order = ""
         if order == "desc":
@@ -342,23 +337,8 @@ class batchsite_main:
             return public.returnMsg(False, 'DIR_NOT_EXISTS_ERR')
         return {"status": "success", "path": exclePath}
 
-    def file_iterator(file_path, chunk_size=512):
-        """
-            文件读取迭代器
-        :param file_path:文件路径
-        :param chunk_size: 每次读取流大小
-        :return:
-        """
-        with open(file_path, 'rb') as target_file:
-            while True:
-                chunk = target_file.read(chunk_size)
-                if chunk:
-                    yield chunk
-                else:
-                    break
-
     # 判断域名是否存在
-    def CheckDomainExist(self, cdomain):
+    def checkDomainExist(self, cdomain):
         # 获得当前配置文件下的所有域名
         Domains = self.GetHostConfig("")
         for domain in Domains["domains"]:
@@ -367,7 +347,7 @@ class batchsite_main:
         return False
 
     # 获取新站点的ID
-    def GetSiteNewID(self):
+    def getSiteNewID(self):
         MaxId = public.M("sqlite_sequence").where('name=?', ("sites")).field('seq').find()
         if "seq" in MaxId:
             Id = MaxId["seq"]
@@ -375,102 +355,13 @@ class batchsite_main:
             Id = 0
         return int(Id) + 1
 
-        # 添加域名记录
-
-    def AddDomainConfig(self, get):
-        if self.CheckDomainExist(get.domain):
-            return {"status": "error", "msg": "试图添加的域名[" + get.domain + "]已经存在！"}
-
-        # 遍历配置文件 寻找是否存在相同的 ip 地址
-        Hosts = public.ReadFile(self.__host_path)
-        # 按行切割配置文件
-        host = Hosts.split("\n")
-        lip = -1
-        i = 0
-        # 使用空格切割每行中的数据
-        for _host in host:
-            ip = _host.split(" ")
-            if get.ip == ip[0]:
-                lip = i
-                pass
-            else:
-                i = i + 1
-        if lip == -1:
-            Hosts = Hosts + "\n" + get.ip + "  " + get.domain
-            public.WriteFile(self.__host_path, Hosts)
-        else:
-            host[lip] = host[lip] + "  " + get.domain
-            num = len(host) - 1
-            i = 0
-            NHosts = ""
-            while i != num:
-                NHosts = NHosts + host[i] + "\n"
-                i = i + 1
-            public.WriteFile(self.__host_path, NHosts)
-        return {"status": "success", "msg": "域名[" + get.domain + "]添加成功！"}
-
-        # 删除域名记录
-
-    def DelDomainConfig(self, get):
-        if not self.CheckDomainExist(get.domain):
-            return {"status": "error", "msg": "试图删除的域名[" + get.domain + "]不存在！"}
-        else:
-            # 遍历找到当前域名所在的位置
-            Hosts = public.ReadFile(self.__host_path)
-            Domains = []
-            NHosts = ""
-            # 按行切割配置文件
-            host = Hosts.split("\n")
-
-            # 使用空格切割每行中的数据
-            for _host in host:
-                info = _host.split(" ")
-                i = 0
-                m = -1
-                for domain in info:
-                    if get.domain == domain:
-                        info[i] = ""
-                        m = i
-                    i = i + 1
-                num = len(info)
-                line = ""
-                i = 0
-                # 组装当前行的数据
-                while i != num:
-                    line = line + info[i]
-                    if i != m:
-                        line = line + " "
-                    i = i + 1
-                NHosts = NHosts + line + "\n"
-            public.WriteFile(self.__host_path, NHosts)
-            return {"status": "success", "msg": "域名[" + get.domain + "]删除成功！"}
-
-        # 修改域名记录
-
-    def EditDomainConfig(self, get):
-        if not self.CheckDomainExist(get.olddomain):
-            return {"status": "error", "msg": "试图修改的域名[" + get.olddomain + "]不存在！"}
-        else:
-            olddomain = public.dict_obj()
-            newdomain = public.dict_obj()
-            olddomain.domain = get.olddomain
-            olddomain.ip = get.ip
-            newdomain.domain = get.newdomain
-            newdomain.ip = get.ip
-            self.DelDomainConfig(olddomain)
-            res = self.AddDomainConfig(newdomain)
-            if res["status"] == "success":
-                return {"status": "success", "msg": "域名[" + get.olddomain + "]修改成功！"}
-            else:
-                return res
-
     # 获得可以一键部署的文件列表
-    def GetInstallList(self, args):
+    def getInstallList(self, args):
         self.FileDir = []
         dir = dict_obj()
         dir.path = self.__bag_path
         dir.back = 1
-        List = self.GetFileDirList(dir)
+        List = self.getFileDirList(dir)
         for file in List:
             # 检查文件是不是 zip 格式的压缩文件
             if not re.match("\S{1,}.zip", str(file)) or not os.path.isfile(self.__bag_path + file):
@@ -478,20 +369,20 @@ class batchsite_main:
         return {"status": "Success", "List": List}
 
     # 递归获得指定文件下下的所有文件
-    def GetFileDirList(self, args):
+    def getFileDirList(self, args):
         for file in os.listdir(args.path):
             path = os.path.join(file)
             if os.path.isdir(path):
                 rec = dict_obj()
                 rec.back = 0
                 rec.path = path
-                self.GetFileDirList(rec)
+                self.getFileDirList(rec)
             else:
                 self.FileDir.append(path)
         if int(args.back) == 1:
             return self.FileDir
 
     # 获得当前的php 的版本信息
-    def OptionPHPVersion(self, args):
+    def optionPHPVersion(self, args):
         version = BT_SITE.GetPHPVersion(args)
         return {"status": "Success", "list": version}
