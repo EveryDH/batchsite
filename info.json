@@ -1,7 +1,7 @@
 {
   "title": "批量添加站点",
   "name": "batchsite",
-  "ps": "批量添加站点,删除站点（支持Excel列表上传）",
+  "ps": "批量添加站点,删除站点（支持Excel列表上传,下载）",
   "versions": "1.0",
   "checks": "/www/server/panel/plugin/batchsite",
   "author": "Every",
