@@ -8,10 +8,12 @@
 # |   宝塔批量建站工具 batchsite
 # +-------------------------------------------------------------------
 import io, re, public, os, sys, json, panelSite, database, \
-    files, ftp, copy, site, pandas as pd, data
-
-# 设置运行目录
-os.chdir("/www/server/panel")
+    files, ftp, copy, site, data
+try:
+    import pandas
+except:
+    os.system('pip install -i https://pypi.tuna.tsinghua.edu.cn/simple pandas')
+    import pandas as pd
 
 # 添加包引用位置并引用公共包
 sys.path.append("class/")
@@ -45,42 +47,34 @@ if __name__ != '__main__':
 
 
 class batchsite_main:
-    __SETUP_PATH = 'plugin/batchsite'
-    __PLUGIN_PATH = "/www/server/panel/plugin/batchsite/"
-    __CONFIG = __SETUP_PATH + "/config/"
-    __PLUGIN_CONFIG = __PLUGIN_PATH + "config/config.json"
-    __PLUGIN_RESULT_LOG = __PLUGIN_PATH + "config/result_log.json"
-    __HOST_PATH = "/etc/hosts"
-    __SITE_ADD_FILE = __PLUGIN_PATH + 'config/addsites.json'
-    __SITE_DEL_FILE = __PLUGIN_PATH + 'config/delsites.json'
-    __bag_path = __PLUGIN_PATH + 'install/'
-    __domain_excle = 'domain.xlsx'
-    __excle_path = __CONFIG + __domain_excle
-    __ap_excle_path = __PLUGIN_PATH + __domain_excle
+    SETUP_PATH = 'plugin/batchsite'
+    PANEL_PATH = '/www/server/panel';
+    PLUGIN_PATH = PANEL_PATH + "/plugin/batchsite/"
+    CONFIG_PATH = SETUP_PATH + "/config/"
+    PLUGIN_CONFIG = PLUGIN_PATH + "config/config.json"
+    PLUGIN_RESULT_LOG = PLUGIN_PATH + "config/result_log.json"
+    SITE_ADD_FILE = PLUGIN_PATH + 'config/addsites.json'
+    SITE_DEL_FILE = PLUGIN_PATH + 'config/delsites.json'
+    BAG_PATH = PLUGIN_PATH + 'install/'
+    DOMAIN_EXCLE = 'domain.xlsx'
+    EXCLE_PATH = CONFIG_PATH + DOMAIN_EXCLE
+    AP_EXCLE_PATH = PLUGIN_PATH + DOMAIN_EXCLE
 
     # 构造方法
     def __init__(self):
-        # 如果 不存在配置文件 则自动初始化配置文件
-        if not os.path.exists(self.__PLUGIN_CONFIG):
-            self.Plugin_Init()
-        # 读取根目录下的 config.json
-        config = json.loads(public.ReadFile(self.__PLUGIN_CONFIG))
-        self.__bag_path = config["bag"]
-        # 如果 不存在插件的安装目录 创建
-        if not os.path.exists(self.__bag_path):
-            os.mkdir(self.__bag_path)
+        pass
 
     # 保存domain list数据到local
     def saveDomainList(self, args):
         if not 'siteList' in args: return public.returnMsg(False, '参数不正确!')
         siteList = json.loads(args.siteList)
-        site_file = self.__SITE_ADD_FILE;
+        site_file = self.SITE_ADD_FILE;
         self.setWriteFile(siteList, site_file)
-        if os.path.exists(self.__SITE_ADD_FILE):
+        if os.path.exists(self.SITE_ADD_FILE):
             result = {}
             result['size'] = len(siteList);
             return {"status": "Success", "size": result['size']}
-        if not os.path.exists(self.__SITE_ADD_FILE):
+        if not os.path.exists(self.SITE_ADD_FILE):
             return public.returnMsg(False, 'DIR_DEL_ERR')
 
     #  通用替换文件 写入
@@ -105,25 +99,25 @@ class batchsite_main:
     # 使用 pandas 之前需要先执行: pip install pandas
     # 上传 域名添加 Excel 文件
     def uploadAddDomainExcel(self, args):
-        path = self.__SITE_ADD_FILE
+        path = self.SITE_ADD_FILE
         rdata = self.uploadExcel(args, path)
         return rdata
 
     # 上传 域名删除 Excel 文件
     def uploadDelDomainExcel(self, args):
-        path = self.__SITE_DEL_FILE
+        path = self.SITE_DEL_FILE
         rdata = self.uploadExcel(args, path)
         return rdata
 
     # 获取上传删除域名 Excel 文件 返回json数据
     def getDelDomainList(self, args):
-        jsonFile = self.__SITE_DEL_FILE
+        jsonFile = self.SITE_DEL_FILE
         rdata = self.getDomainList(jsonFile)
         return rdata
 
     # 获取上传添加域名 Excel 文件 返回json数据
     def getAddDomainList(self, args):
-        jsonFile = self.__SITE_ADD_FILE
+        jsonFile = self.SITE_ADD_FILE
         rdata = self.getDomainList(jsonFile)
         return rdata
 
@@ -158,7 +152,7 @@ class batchsite_main:
     # 批量删除 站点
     def delDomainList(self, args):
         data = json.loads(args.siteList)
-        # site_file = self.__SITE_DEL_FILE;
+        # site_file = self.SITE_DEL_FILE;
         # sites_data = self.getReadFile(site_file)
         successSize = [];
         failureSize = [];
@@ -186,7 +180,7 @@ class batchsite_main:
     # 批量添加站点域名
     def addDomainList(self, args):
         # 获取用户确认后的 site信息
-        # sites_data = self.getReadFile(self.__SITE_ADD_FILE)
+        # sites_data = self.getReadFile(self.SITE_ADD_FILE)
         # result = {}
         # result['size'] = len(sites_data);
         # # data = json.loads(args.domain_info)
@@ -194,7 +188,7 @@ class batchsite_main:
         #     return {"status": "Success", "data":sites_data}
 
         data = json.loads(args.domain_info)
-        site_file = self.__SITE_ADD_FILE;
+        site_file = self.SITE_ADD_FILE;
         sites_data = self.getReadFile(site_file)
 
         successSize = [];
@@ -236,14 +230,14 @@ class batchsite_main:
             # 保存 建站日志到 本地
             # resultSize.append(successSize)
             # resultSize.append(failureSize)
-            # self.setWriteFile(successSize, self.__PLUGIN_RESULT_LOG)
+            # self.setWriteFile(successSize, self.PLUGIN_RESULT_LOG)
             # return {"status": "Success", "failureSize": failureSize}
 
             # 删除网站目录下的所有无用的文件
             os.popen("cd " + site_obj.path + " && rm -rf *")
 
             # 解压文件
-            os.popen("cd " + self.__bag_path + " && unzip -o " + site_obj.zip + " -d " + site_obj.path + "/")
+            os.popen("cd " + self.BAG_PATH + " && unzip -o " + site_obj.zip + " -d " + site_obj.path + "/")
 
             cmd = ""
             # 判断网站根目录下是否存在 index.php 文件
@@ -302,7 +296,7 @@ class batchsite_main:
             files.files().SetFileAccess(file)
 
         count = successSize + failureSize
-        self.setWriteFile(successSize, self.__PLUGIN_RESULT_LOG)
+        self.setWriteFile(successSize, self.PLUGIN_RESULT_LOG)
         return {"status": "Success", "site":
             {"count": len(count), "successSize": len(successSize), "failureSize": len(failureSize)}}
 
@@ -331,7 +325,7 @@ class batchsite_main:
             rdataDict = {key: value for key, value in dic.items() if key in attr}
             rdataList.append(rdataDict)
         frame = pd.DataFrame(rdataList)
-        exclePath = self.__ap_excle_path
+        exclePath = self.AP_EXCLE_PATH
         frame.to_excel(exclePath, index=False)
         if not os.path.exists(exclePath):
             return public.returnMsg(False, 'DIR_NOT_EXISTS_ERR')
@@ -359,12 +353,12 @@ class batchsite_main:
     def getInstallList(self, args):
         self.FileDir = []
         dir = dict_obj()
-        dir.path = self.__bag_path
+        dir.path = self.BAG_PATH
         dir.back = 1
         List = self.getFileDirList(dir)
         for file in List:
             # 检查文件是不是 zip 格式的压缩文件
-            if not re.match("\S{1,}.zip", str(file)) or not os.path.isfile(self.__bag_path + file):
+            if not re.match("\S{1,}.zip", str(file)) or not os.path.isfile(self.BAG_PATH + file):
                 List.remove(file)
         return {"status": "Success", "List": List}
 
