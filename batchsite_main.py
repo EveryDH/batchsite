@@ -249,10 +249,10 @@ class batchsite_main:
                         # 删除原文件
                         os.popen("cd " + site_obj.path + " && rm -rf " + file)
             # 导入数据库
-            # data = dict_obj()
-            # data.file = site_obj.path + "/base/install/db/db.sql"
-            # data.name = site_obj.datauser
-            # BT_Data.InputSql(data)
+            data = dict_obj()
+            data.file = site_obj.path + "/data/cms.sql"
+            data.name = site_obj.datauser
+            BT_DATA.InputSql(data)
 
             # 创建FTP
             # BTftp = ftp.ftp()
