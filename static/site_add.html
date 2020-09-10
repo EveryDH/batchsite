@@ -109,27 +109,41 @@
                        value="/www/wwwroot/"/>
             </div>
         </div>
-        <!--       <div class="layui-form-item">
-                   <label class="layui-form-label">数据库</label>
-                   <div class="layui-input-block" style="width:330px">
-                       <input type="text" name="datauser" class="layui-input"
-                              value=数据库账号>
-                       <br>
-                       <input type="text" name="datapassword" class="layui-input"
-                              value="数据库密码"/>
-                   </div>
-               </div>
-               <div class="layui-form-item">
-                   <label class="layui-form-label">FTP</label>
-                   <div class="layui-input-block" style="width:330px">
-                       <input type="text" name="ftp_username" class="layui-input"
-                              value=FTP账号>
-                       <br>
-                       <input type="text" name="ftp_password" class="layui-input"
-                              value="FTP密码"/>
-                   </div>
-               </div>
-               -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">数据库配置文件路径</label>
+            <div class="layui-input-block" style="width:330px">
+                <input type="text" name="sqlConfigPath" placeholder="请输入" autocomplete="off" class="layui-input"
+                       value="/data/common.inc.php"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">数据库路径</label>
+            <div class="layui-input-block" style="width:330px">
+                <input type="text" name="sqlPath" placeholder="请输入" autocomplete="off" class="layui-input"
+                       value="/data/cms.sql"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">老数据库名称</label>
+            <div class="layui-input-block" style="width:330px">
+                <input type="text" name="oldSqlName" placeholder="请输入" autocomplete="off" class="layui-input"
+                       value="www_xxx_com"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">老数据库用户</label>
+            <div class="layui-input-block" style="width:330px">
+                <input type="text" name="oldSqlUser" placeholder="请输入" autocomplete="off" class="layui-input"
+                       value="root"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">老数据库密码</label>
+            <div class="layui-input-block" style="width:330px">
+                <input type="text" name="oldSqlPW" placeholder="请输入" autocomplete="off" class="layui-input"
+                       value="www_xxx_com"/>
+            </div>
+        </div>
         <div class="layui-form-item">
             <label class="layui-form-label">程序类型</label>
             <div class="layui-input-block">
@@ -223,21 +237,21 @@
             if (rdata["status"] == "Success") {
                 console.log(rdata["List"]);
                 for (var i = 0; i < rdata["List"].length; i++) {
-                  $("#option_list").append('<option value="' + rdata["List"][i] + '">' + rdata["List"][i] + '</option>>')
+                    $("#option_list").append('<option value="' + rdata["List"][i] + '">' + rdata["List"][i] + '</option>>')
                 }
                 form.render('select');
             }
         });
     }
 
-        // 搜索当前的可用插件的安装包
+    // 搜索当前的可用插件的安装包
     function optionPHPVersion() {
         request_plugin("batchsite", "optionPHPVersion", "", function (rdata) {
             if (rdata["status"] == "Success") {
                 // var html = '';
                 console.log(rdata["list"]);
                 for (var i = 0; i < rdata["list"].length; i++) {
-                    $("#version_list").append('<option value="' + rdata["list"][i]["version"]+ '">' + rdata["list"][i]["name"] + '</option>>')
+                    $("#version_list").append('<option value="' + rdata["list"][i]["version"] + '">' + rdata["list"][i]["name"] + '</option>>')
                 }
                 form.render('select');
             }

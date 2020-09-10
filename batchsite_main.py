@@ -7,12 +7,18 @@
 # +-------------------------------------------------------------------
 # |   宝塔批量建站工具 batchsite
 # +-------------------------------------------------------------------
-import io, re, public, os, sys, json, panelSite, database, \
-    files, ftp, copy, site, data
+import io,re, public, os, sys, json, panelSite, database, \
+    files, ftp, copy, site, data,glob
+
 try:
-    import pandas
+    import xlrd as xlrd
 except:
-    os.system('pip install -i https://pypi.tuna.tsinghua.edu.cn/simple pandas')
+    os.system('python3 -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple xlrd')
+    import xlrd as xlrd
+try:
+    import pandas as pd
+except:
+    os.system('python3 -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple pandas')
     import pandas as pd
 
 # 添加包引用位置并引用公共包
@@ -177,7 +183,23 @@ class batchsite_main:
                 "site": {"count": len(count), "successSize": len(successSize), "failureSize": len(failureSize)}
                 }
 
-    # 批量添加站点域名
+    def replaceStr(self,site_obj):
+        import glob
+        xmls = glob.glob(site_obj.path + site_obj.sqlConfigPath)
+        for one_xml in xmls:
+            print(one_xml)
+            f = open(one_xml, 'r+')
+            all_the_lines = f.readlines()
+            f.seek(0)
+            f.truncate()
+            for line in all_the_lines:
+                line = line.replace(site_obj.oldSqlName, site_obj.datauser)
+                line = line.replace(site_obj.oldSqlUser, site_obj.datauser)
+                line = line.replace(site_obj.oldSqlPW, site_obj.datapassword)
+                f.write(line)
+            f.close()
+
+        # 批量添加站点域名
     def addDomainList(self, args):
         # 获取用户确认后的 site信息
         # sites_data = self.getReadFile(self.SITE_ADD_FILE)
@@ -218,7 +240,16 @@ class batchsite_main:
             site_obj.sql = "true"
             site_obj.datauser = site['datauser']
             site_obj.datapassword = site['datapassword']
-            site_obj.zip = data["zip"]
+
+            #替换老数据库属性变量
+            site_obj.sqlConfigPath = data['sqlConfigPath']
+            site_obj.oldSqlName = data['oldSqlName']
+            site_obj.oldSqlUser = data['oldSqlUser']
+            site_obj.oldSqlPW = data['oldSqlPW']
+
+            zipPath = data["zip"]
+            sqlPath = data['sqlPath']
+            domainPath = data['path'] + domain
 
             # 添加网站
             psa = BT_SITE.AddSite(site_obj)
@@ -234,32 +265,35 @@ class batchsite_main:
             # return {"status": "Success", "failureSize": failureSize}
 
             # 删除网站目录下的所有无用的文件
-            os.popen("cd " + site_obj.path + " && rm -rf *")
+            os.popen("cd " + domainPath + " && rm -rf *")
 
             # 解压文件
-            os.popen("cd " + self.BAG_PATH + " && unzip -o " + site_obj.zip + " -d " + site_obj.path + "/")
+            os.popen("cd " + self.BAG_PATH + " && unzip -o " + zipPath + " -d " + domainPath + "/")
 
             cmd = ""
             # 判断网站根目录下是否存在 index.php 文件
-            while not os.path.exists(site_obj.path + "/index.php"):
-                for file in os.listdir(site_obj.path):
-                    if os.path.isdir(site_obj.path + "/" + file):
+            while not os.path.exists(domainPath + "/index.php"):
+                for file in os.listdir(domainPath):
+                    if os.path.isdir(domainPath + "/" + file):
                         # 将文件夹拷贝到上级文件夹
-                        os.popen("mv " + site_obj.path + "/" + file + "/* " + site_obj.path)
+                        os.popen("mv " + domainPath + "/" + file + "/* " + domainPath)
                         # 删除原文件
-                        os.popen("cd " + site_obj.path + " && rm -rf " + file)
+                        os.popen("cd " + domainPath + " && rm -rf " + file)
+
+            self.replaceStr(site_obj)
+
             # 导入数据库
-            data = dict_obj()
-            data.file = site_obj.path + "/data/cms.sql"
-            data.name = site_obj.datauser
-            BT_DATA.InputSql(data)
+            dataObj = dict_obj()
+            dataObj.file = data['path'] + domain + sqlPath
+            dataObj.name = site_obj.datauser
+            BT_DATA.InputSql(dataObj)
 
             # 创建FTP
             # BTftp = ftp.ftp()
             FTP = dict_obj()
             FTP.ftp_username = site_obj.ftp_username
             FTP.ftp_password = site_obj.ftp_password
-            # FTP.path = site_obj.path
+            # FTP.path = domainPath
             # FTP.ps = site_obj.ps
             # BTftp.AddUser(FTP)
 
@@ -271,25 +305,25 @@ class batchsite_main:
                     $dbName="%s";
                     $dbUser="%s";
                     $dbPass="%s";
-    
+
                     #[数据表前缀]
                     $TablePre="dev";
-    
+
                     #[语言]
                     $sLan="zh_cn";
-    
+
                     #[网址]
                     $SiteUrl="http://%s";
-    
+
                     #----------------------------------#
                     ?>
                     ''' % (site_obj.datauser, site_obj.datauser, site_obj.datapassword, domain)
             # 写入站点
-            public.WriteFile(site_obj.path + "/config.inc.php", PhpConfig.encode("UTF-8"))
+            public.WriteFile(domainPath + "/config.inc.php", PhpConfig.encode("UTF-8"))
             # 删除原目录下的 install 文件夹
-            os.popen("rm -rf " + site_obj.path + "/base/install/")
+            os.popen("rm -rf " + domainPath + "/base/install/")
             file = dict_obj()
-            file.filename = site_obj.path
+            file.filename = domainPath
             file.user = "www"
             file.access = "755"
             file.all = "True"
@@ -301,7 +335,7 @@ class batchsite_main:
             {"count": len(count), "successSize": len(successSize), "failureSize": len(failureSize)}}
 
     # return {"status": "Success", "site": {"Success": domain, "Failure": site_obj.datauser,
-    #                                       "data_pass": site_obj.datapassword, "site_path": site_obj.path,
+    #                                       "data_pass": site_obj.datapassword, "site_path": domainPath,
     #                                       "ftp_username": site_obj.ftp_username, "ftp_password": site_obj.ftp_password}}
 
     # 获取宝塔 域名列表

@@ -196,6 +196,9 @@
     function delSelect() {
         layer.confirm('确认要删除这些记录吗？', function (index) {
             layer.closeAll('dialog');
+            load = layer.msg('批量删除站点中 请稍等...', {
+                time: false
+            });
             checkbox = $("[name='SiteList']");
             num = checkbox.length;
             // var siteList = [];
