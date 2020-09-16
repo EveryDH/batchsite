@@ -183,7 +183,7 @@ class batchsite_main:
                 "site": {"count": len(count), "successSize": len(successSize), "failureSize": len(failureSize)}
                 }
 
-    def replaceStr(self,site_obj):
+    def replaceStr(self, site_obj):
         import glob
         xmls = glob.glob(site_obj.path + site_obj.sqlConfigPath)
         for one_xml in xmls:
@@ -199,7 +199,18 @@ class batchsite_main:
                 f.write(line)
             f.close()
 
-        # 批量添加站点域名
+    # 批量替换文件
+    def replaceFiles(self):
+        sitePath = [
+            "www.xxx.cn",
+        ]
+
+        for site in sitePath:
+            os.popen("cd /www/wwwroot/" + site + "/templets/default && rm -f taglist.htm")
+            os.popen(
+                "cp /www/server/panel/plugin/batchsite/config/taglist.htm " + "/www/wwwroot/" + site + "/templets/default")
+
+    # 批量添加站点域名
     def addDomainList(self, args):
         # 获取用户确认后的 site信息
         # sites_data = self.getReadFile(self.SITE_ADD_FILE)
